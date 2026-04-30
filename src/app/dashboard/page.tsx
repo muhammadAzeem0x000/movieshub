@@ -12,7 +12,7 @@ export default async function DashboardPage() {
   }
 
   const { data: movies, error } = await supabase
-    .from('user_movies')
+    .from('user_media')
     .select('*')
     .order('watched_at', { ascending: false })
 

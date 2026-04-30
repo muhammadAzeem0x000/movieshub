@@ -11,17 +11,20 @@ import { Card, CardContent } from '@/components/ui/card'
 
 export default function DashboardClient({ initialMovies }: { initialMovies: any[] }) {
   const [movies, setMovies] = useState(initialMovies)
-  const [selectedMovieId, setSelectedMovieId] = useState<number | null>(null)
+  const [selectedMediaId, setSelectedMediaId] = useState<number | null>(null)
+  const [selectedMediaType, setSelectedMediaType] = useState<'movie' | 'tv' | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   
   const [genreFilter, setGenreFilter] = useState<string>('All')
+  const [typeFilter, setTypeFilter] = useState<'All' | 'movie' | 'tv'>('All')
   const [sortBy, setSortBy] = useState<'recent' | 'rating'>('recent')
 
   const [recommendations, setRecommendations] = useState<any[]>([])
   const [loadingRecs, setLoadingRecs] = useState(false)
 
-  const handleSelectMovie = (movie: any) => {
-    setSelectedMovieId(movie.id)
+  const handleSelectMedia = (media: any) => {
+    setSelectedMediaId(media.id || media.tmdb_id)
+    setSelectedMediaType(media.media_type)
     setIsModalOpen(true)
   }
 
@@ -34,6 +37,10 @@ export default function DashboardClient({ initialMovies }: { initialMovies: any[
   const filteredAndSortedMovies = useMemo(() => {
     let result = [...movies]
 
+    if (typeFilter !== 'All') {
+      result = result.filter(m => m.media_type === typeFilter)
+    }
+
     if (genreFilter !== 'All') {
       result = result.filter(m => m.genres?.includes(genreFilter))
     }
@@ -45,7 +52,7 @@ export default function DashboardClient({ initialMovies }: { initialMovies: any[
     }
 
     return result
-  }, [movies, genreFilter, sortBy])
+  }, [movies, typeFilter, genreFilter, sortBy])
 
   const generateRecommendations = async () => {
     setLoadingRecs(true)
@@ -68,8 +75,8 @@ export default function DashboardClient({ initialMovies }: { initialMovies: any[
     <div className="space-y-8">
       {/* Search Section */}
       <section className="bg-card p-6 rounded-lg border shadow-sm flex flex-col items-center justify-center min-h-[200px]">
-        <h2 className="text-2xl font-bold mb-6">Log a New Movie</h2>
-        <MovieSearch onSelectMovie={handleSelectMovie} />
+        <h2 className="text-2xl font-bold mb-6">Log a New Movie or TV Show</h2>
+        <MovieSearch onSelectMedia={handleSelectMedia} />
       </section>
 
       {/* AI Recommendations Section */}
@@ -89,7 +96,7 @@ export default function DashboardClient({ initialMovies }: { initialMovies: any[
                 <CardContent className="p-4 flex flex-col h-full gap-2">
                   <h3 className="font-semibold text-lg line-clamp-1">{rec.title}</h3>
                   <p className="text-xs text-muted-foreground line-clamp-4 flex-grow">{rec.reason}</p>
-                  <Button variant="secondary" size="sm" className="mt-2 w-full" onClick={() => handleSelectMovie({ id: rec.tmdb_id, title: rec.title })}>
+                  <Button variant="secondary" size="sm" className="mt-2 w-full" onClick={() => handleSelectMedia({ id: rec.tmdb_id, title: rec.title, media_type: rec.tmdb_id ? 'movie' : 'movie' })}>
                     Log this
                   </Button>
                 </CardContent>
@@ -99,7 +106,7 @@ export default function DashboardClient({ initialMovies }: { initialMovies: any[
         )}
         {recommendations.length === 0 && !loadingRecs && (
           <div className="p-8 text-center text-muted-foreground border rounded-lg border-dashed">
-            Click &quot;Generate&quot; to get AI recommendations based on your highly rated movies.
+            Click &quot;Generate&quot; to get AI recommendations based on your highly rated titles.
           </div>
         )}
       </section>
@@ -107,9 +114,20 @@ export default function DashboardClient({ initialMovies }: { initialMovies: any[
       {/* Movies Grid Section */}
       <section className="space-y-4">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          <h2 className="text-2xl font-bold">Your Watched Movies ({movies.length})</h2>
+          <h2 className="text-2xl font-bold">Your Watched Titles ({filteredAndSortedMovies.length})</h2>
           
           <div className="flex items-center gap-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger className="inline-flex items-center justify-between whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-8 px-3 w-[140px]">
+                <span className="flex items-center"><Filter className="mr-2 h-4 w-4" /> {typeFilter === 'All' ? 'All Types' : typeFilter === 'movie' ? 'Movies' : 'TV Shows'}</span>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem onClick={() => setTypeFilter('All')}>All Types</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setTypeFilter('movie')}>Movies</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setTypeFilter('tv')}>TV Shows</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
             <DropdownMenu>
               <DropdownMenuTrigger className="inline-flex items-center justify-between whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-8 px-3 w-[140px]">
                 <span className="flex items-center"><Filter className="mr-2 h-4 w-4" /> {genreFilter}</span>
@@ -136,31 +154,34 @@ export default function DashboardClient({ initialMovies }: { initialMovies: any[
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-          {filteredAndSortedMovies.map(movie => (
-            <Card key={movie.id} className="overflow-hidden relative group">
+          {filteredAndSortedMovies.map(media => (
+            <Card key={media.id} className="overflow-hidden relative group">
               <div className="aspect-[2/3] bg-muted relative">
-                {movie.poster_path ? (
+                {media.poster_path ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={`https://image.tmdb.org/t/p/w342${movie.poster_path}`} alt={movie.title} className="object-cover w-full h-full transition-transform group-hover:scale-105" />
+                  <img src={`https://image.tmdb.org/t/p/w342${media.poster_path}`} alt={media.title} className="object-cover w-full h-full transition-transform group-hover:scale-105" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">No Image</div>
                 )}
-                {movie.user_rating && (
+                <div className="absolute top-2 left-2 bg-primary/90 text-primary-foreground px-1.5 py-0.5 rounded-sm text-[10px] font-bold uppercase tracking-wider">
+                  {media.media_type}
+                </div>
+                {media.user_rating && (
                   <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-md px-2 py-1 rounded-md flex items-center gap-1 text-yellow-500 font-semibold text-sm">
                     <Star className="w-3 h-3 fill-current" />
-                    {movie.user_rating}
+                    {media.user_rating}
                   </div>
                 )}
               </div>
               <CardContent className="p-3">
-                <h3 className="font-semibold text-sm line-clamp-1">{movie.title}</h3>
-                <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{movie.genres?.slice(0,2).join(', ')}</p>
+                <h3 className="font-semibold text-sm line-clamp-1">{media.title}</h3>
+                <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{media.genres?.slice(0,2).join(', ')}</p>
               </CardContent>
             </Card>
           ))}
           {filteredAndSortedMovies.length === 0 && (
             <div className="col-span-full py-12 text-center text-muted-foreground">
-              No movies found. Start logging some!
+              No titles found. Start logging some!
             </div>
           )}
         </div>
@@ -168,10 +189,10 @@ export default function DashboardClient({ initialMovies }: { initialMovies: any[
 
       <MovieModal
         isOpen={isModalOpen}
-        movieId={selectedMovieId}
+        mediaId={selectedMediaId}
+        mediaType={selectedMediaType}
         onClose={() => {
           setIsModalOpen(false)
-          // To get fresh data we should technically router.refresh(), but we'll do it on close
           window.location.reload()
         }}
       />

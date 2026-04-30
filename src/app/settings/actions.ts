@@ -12,7 +12,7 @@ export async function exportData() {
   if (!user) return { error: 'Not authenticated' }
 
   const { data, error } = await supabase
-    .from('user_movies')
+    .from('user_media')
     .select('*')
     .eq('user_id', user.id)
 
@@ -38,8 +38,8 @@ export async function deleteAccount() {
 
   if (!user) return { error: 'Not authenticated' }
 
-  // 1. Delete all user movies (Though RLS and ON DELETE CASCADE should handle this)
-  await supabase.from('user_movies').delete().eq('user_id', user.id)
+  // 1. Delete all user media (Though RLS and ON DELETE CASCADE should handle this)
+  await supabase.from('user_media').delete().eq('user_id', user.id)
 
   // 2. Delete user from auth schema using service role key
   // This requires the SUPABASE_SERVICE_ROLE_KEY in the environment

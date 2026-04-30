@@ -7,39 +7,40 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Loader2, Star, Film } from 'lucide-react'
 import { toast } from 'sonner'
-import { saveMovie } from '@/app/actions/movie'
+import { saveMedia } from '@/app/actions/media'
 
-interface MovieModalProps {
-  movieId: number | null
+interface MediaModalProps {
+  mediaId: number | null
+  mediaType: 'movie' | 'tv' | null
   isOpen: boolean
   onClose: () => void
 }
 
-export function MovieModal({ movieId, isOpen, onClose }: MovieModalProps) {
+export function MovieModal({ mediaId, mediaType, isOpen, onClose }: MediaModalProps) {
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
-  const [movieDetails, setMovieDetails] = useState<any>(null)
+  const [mediaDetails, setMediaDetails] = useState<any>(null)
   const [rating, setRating] = useState<number>(0)
   const [review, setReview] = useState('')
 
   useEffect(() => {
-    if (isOpen && movieId) {
+    if (isOpen && mediaId && mediaType) {
       setRating(0)
       setReview('')
-      setMovieDetails(null)
-      fetchDetails(movieId)
+      setMediaDetails(null)
+      fetchDetails(mediaId, mediaType)
     }
-  }, [isOpen, movieId])
+  }, [isOpen, mediaId, mediaType])
 
-  async function fetchDetails(id: number) {
+  async function fetchDetails(id: number, type: string) {
     setLoading(true)
     try {
-      const res = await fetch(`/api/movie?id=${id}`)
+      const res = await fetch(`/api/media?id=${id}&type=${type}`)
       const data = await res.json()
       if (data.error) throw new Error(data.error)
-      setMovieDetails(data)
+      setMediaDetails(data)
     } catch (error: any) {
-      toast.error('Failed to load movie details: ' + error.message)
+      toast.error('Failed to load media details: ' + error.message)
       onClose()
     } finally {
       setLoading(false)
@@ -47,14 +48,15 @@ export function MovieModal({ movieId, isOpen, onClose }: MovieModalProps) {
   }
 
   async function handleSave() {
-    if (!movieDetails) return
+    if (!mediaDetails || !mediaType) return
 
     setSaving(true)
-    const genres = movieDetails.genres.map((g: any) => g.name)
-    const result = await saveMovie({
-      tmdb_id: movieDetails.id,
-      title: movieDetails.title,
-      poster_path: movieDetails.poster_path,
+    const genres = mediaDetails.genres.map((g: any) => g.name)
+    const result = await saveMedia({
+      tmdb_id: mediaDetails.id,
+      media_type: mediaType,
+      title: mediaDetails.title || mediaDetails.name,
+      poster_path: mediaDetails.poster_path,
       genres,
       user_rating: rating > 0 ? rating : undefined,
       review: review.trim() || undefined,
@@ -84,14 +86,14 @@ export function MovieModal({ movieId, isOpen, onClose }: MovieModalProps) {
           <div className="flex justify-center p-8">
             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
           </div>
-        ) : movieDetails ? (
+        ) : mediaDetails ? (
           <div className="grid gap-6 py-4">
             <div className="flex gap-4">
-              {movieDetails.poster_path ? (
+              {mediaDetails.poster_path ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
-                  src={`https://image.tmdb.org/t/p/w154${movieDetails.poster_path}`}
-                  alt={movieDetails.title}
+                  src={`https://image.tmdb.org/t/p/w154${mediaDetails.poster_path}`}
+                  alt={mediaDetails.title || mediaDetails.name}
                   className="w-24 h-36 object-cover rounded-md shadow-md"
                 />
               ) : (
@@ -100,12 +102,17 @@ export function MovieModal({ movieId, isOpen, onClose }: MovieModalProps) {
                 </div>
               )}
               <div>
-                <h3 className="font-semibold text-lg leading-tight mb-1">{movieDetails.title}</h3>
+                <div className="flex items-center gap-2 mb-1">
+                  <h3 className="font-semibold text-lg leading-tight">{mediaDetails.title || mediaDetails.name}</h3>
+                  <span className="text-[10px] uppercase font-semibold bg-primary/10 text-primary px-1.5 rounded-sm">
+                    {mediaType}
+                  </span>
+                </div>
                 <p className="text-sm text-muted-foreground mb-2">
-                  {movieDetails.release_date ? new Date(movieDetails.release_date).getFullYear() : 'Unknown'}
+                  {(mediaDetails.release_date || mediaDetails.first_air_date) ? new Date(mediaDetails.release_date || mediaDetails.first_air_date).getFullYear() : 'Unknown'}
                 </p>
                 <div className="flex flex-wrap gap-1">
-                  {movieDetails.genres?.slice(0, 3).map((g: any) => (
+                  {mediaDetails.genres?.slice(0, 3).map((g: any) => (
                     <span key={g.id} className="text-[10px] bg-primary/10 text-primary px-2 py-1 rounded-full">
                       {g.name}
                     </span>
@@ -154,9 +161,9 @@ export function MovieModal({ movieId, isOpen, onClose }: MovieModalProps) {
           <Button variant="outline" onClick={onClose} disabled={saving}>
             Cancel
           </Button>
-          <Button onClick={handleSave} disabled={loading || saving || !movieDetails}>
+          <Button onClick={handleSave} disabled={loading || saving || !mediaDetails}>
             {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Save Movie
+            Save Title
           </Button>
         </DialogFooter>
       </DialogContent>

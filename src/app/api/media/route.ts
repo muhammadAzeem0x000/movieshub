@@ -6,9 +6,10 @@ const TMDB_BASE_URL = 'https://api.themoviedb.org/3'
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const id = searchParams.get('id')
+  const type = searchParams.get('type') // 'movie' or 'tv'
 
-  if (!id) {
-    return NextResponse.json({ error: 'Movie ID parameter "id" is required' }, { status: 400 })
+  if (!id || !type) {
+    return NextResponse.json({ error: 'Parameters "id" and "type" are required' }, { status: 400 })
   }
 
   if (!TMDB_API_KEY) {
@@ -17,7 +18,7 @@ export async function GET(request: Request) {
 
   try {
     const response = await fetch(
-      `${TMDB_BASE_URL}/movie/${id}?api_key=${TMDB_API_KEY}&language=en-US`
+      `${TMDB_BASE_URL}/${type === 'tv' ? 'tv' : 'movie'}/${id}?api_key=${TMDB_API_KEY}&language=en-US`
     )
 
     if (!response.ok) {

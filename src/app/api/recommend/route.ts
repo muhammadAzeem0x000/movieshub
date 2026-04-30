@@ -15,9 +15,9 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
   }
 
-  // Fetch user's highly rated movies (rating >= 7)
+  // Fetch user's highly rated media (rating >= 7)
   const { data: movies, error } = await supabase
-    .from('user_movies')
+    .from('user_media')
     .select('title, genres, user_rating')
     .eq('user_id', user.id)
     .gte('user_rating', 7)

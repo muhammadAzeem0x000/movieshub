@@ -72,14 +72,14 @@ export default function SettingsPage() {
           <CardHeader>
             <CardTitle>Total Data Control</CardTitle>
             <CardDescription>
-              We believe your data belongs to you. You can export your entire movie history or permanently delete your account and all associated data.
+              We believe your data belongs to you. You can export your entire media history or permanently delete your account and all associated data.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border rounded-lg">
               <div>
                 <h3 className="font-medium text-lg">Export Data</h3>
-                <p className="text-sm text-muted-foreground">Download all your saved movies and ratings as a CSV file.</p>
+                <p className="text-sm text-muted-foreground">Download all your saved movies and TV shows as a CSV file.</p>
               </div>
               <Button onClick={handleExport} disabled={exporting} className="mt-4 sm:mt-0">
                 {exporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
