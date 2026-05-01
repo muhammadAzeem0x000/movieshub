@@ -85,35 +85,37 @@ export function MovieSearch({ onSelectMedia }: MediaSearchProps) {
               return (
                 <div
                   key={media.id}
-                  onClick={() => {
+                  onMouseDown={(e) => {
+                    // Prevent default to avoid input blur before click registers
+                    e.preventDefault()
                     onSelectMedia(media)
                     setShowResults(false)
                     setQuery('')
                   }}
-                  className="flex items-center gap-3 p-3 hover:bg-muted cursor-pointer transition-colors border-b last:border-b-0"
+                  className="flex items-center gap-4 p-4 hover:bg-muted cursor-pointer transition-colors border-b last:border-b-0"
                 >
                   {media.poster_path ? (
-                    <div className="relative w-10 h-14 bg-muted flex-shrink-0">
+                    <div className="relative w-14 h-20 bg-muted flex-shrink-0 shadow-sm rounded-md overflow-hidden">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={`https://image.tmdb.org/t/p/w92${media.poster_path}`}
                         alt={displayTitle}
-                        className="object-cover w-full h-full rounded-sm"
+                        className="object-cover w-full h-full"
                       />
                     </div>
                   ) : (
-                    <div className="w-10 h-14 bg-muted rounded-sm flex items-center justify-center flex-shrink-0">
-                      <Film className="h-4 w-4 text-muted-foreground" />
+                    <div className="w-14 h-20 bg-muted rounded-md flex items-center justify-center flex-shrink-0 shadow-sm">
+                      <Film className="h-6 w-6 text-muted-foreground" />
                     </div>
                   )}
                   <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <p className="font-medium text-sm line-clamp-1">{displayTitle}</p>
-                      <span className="text-[10px] uppercase font-semibold bg-primary/10 text-primary px-1.5 rounded-sm">
+                    <div className="flex items-center gap-2 mb-1">
+                      <p className="font-semibold text-base line-clamp-1">{displayTitle}</p>
+                      <span className="text-[11px] uppercase font-bold bg-primary/15 text-primary px-2 py-0.5 rounded-md">
                         {media.media_type}
                       </span>
                     </div>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-sm font-medium text-muted-foreground">
                       {displayDate ? new Date(displayDate).getFullYear() : 'Unknown Year'}
                     </p>
                   </div>
