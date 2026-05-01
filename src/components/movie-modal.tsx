@@ -12,11 +12,12 @@ import { saveMedia } from '@/app/actions/media'
 interface MediaModalProps {
   mediaId: number | null
   mediaType: 'movie' | 'tv' | null
+  initialData?: { rating?: number, review?: string } | null
   isOpen: boolean
   onClose: () => void
 }
 
-export function MovieModal({ mediaId, mediaType, isOpen, onClose }: MediaModalProps) {
+export function MovieModal({ mediaId, mediaType, initialData, isOpen, onClose }: MediaModalProps) {
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [mediaDetails, setMediaDetails] = useState<any>(null)
@@ -25,12 +26,12 @@ export function MovieModal({ mediaId, mediaType, isOpen, onClose }: MediaModalPr
 
   useEffect(() => {
     if (isOpen && mediaId && mediaType) {
-      setRating(0)
-      setReview('')
+      setRating(initialData?.rating || 0)
+      setReview(initialData?.review || '')
       setMediaDetails(null)
       fetchDetails(mediaId, mediaType)
     }
-  }, [isOpen, mediaId, mediaType])
+  }, [isOpen, mediaId, mediaType, initialData])
 
   async function fetchDetails(id: number, type: string) {
     setLoading(true)
@@ -163,7 +164,7 @@ export function MovieModal({ mediaId, mediaType, isOpen, onClose }: MediaModalPr
           </Button>
           <Button onClick={handleSave} disabled={loading || saving || !mediaDetails}>
             {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Save Title
+            {initialData ? 'Update Title' : 'Save Title'}
           </Button>
         </DialogFooter>
       </DialogContent>

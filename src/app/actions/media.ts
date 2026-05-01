@@ -20,18 +20,39 @@ export async function saveMedia(data: {
     return { error: 'Not authenticated' }
   }
 
-  const { error } = await supabase
+  const { data: existing } = await supabase
     .from('user_media')
-    .insert({
-      user_id: user.id,
-      tmdb_id: data.tmdb_id,
-      media_type: data.media_type,
-      title: data.title,
-      poster_path: data.poster_path,
-      genres: data.genres,
-      user_rating: data.user_rating || null,
-      review: data.review || null,
-    })
+    .select('id')
+    .eq('user_id', user.id)
+    .eq('tmdb_id', data.tmdb_id)
+    .maybeSingle()
+
+  let error;
+
+  if (existing) {
+    const res = await supabase
+      .from('user_media')
+      .update({
+        user_rating: data.user_rating || null,
+        review: data.review || null,
+      })
+      .eq('id', existing.id)
+    error = res.error
+  } else {
+    const res = await supabase
+      .from('user_media')
+      .insert({
+        user_id: user.id,
+        tmdb_id: data.tmdb_id,
+        media_type: data.media_type,
+        title: data.title,
+        poster_path: data.poster_path,
+        genres: data.genres,
+        user_rating: data.user_rating || null,
+        review: data.review || null,
+      })
+    error = res.error
+  }
 
   if (error) {
     console.error('Failed to save movie:', error)

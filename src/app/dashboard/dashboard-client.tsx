@@ -13,6 +13,7 @@ export default function DashboardClient({ initialMovies }: { initialMovies: any[
   const [movies, setMovies] = useState(initialMovies)
   const [selectedMediaId, setSelectedMediaId] = useState<number | null>(null)
   const [selectedMediaType, setSelectedMediaType] = useState<'movie' | 'tv' | null>(null)
+  const [selectedMediaData, setSelectedMediaData] = useState<{ rating?: number, review?: string } | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   
   const [genreFilter, setGenreFilter] = useState<string>('All')
@@ -23,8 +24,17 @@ export default function DashboardClient({ initialMovies }: { initialMovies: any[
   const [loadingRecs, setLoadingRecs] = useState(false)
 
   const handleSelectMedia = (media: any) => {
-    setSelectedMediaId(media.id || media.tmdb_id)
+    // media.tmdb_id exists if it comes from the DB, media.id is the TMDB ID if it comes from the search API
+    setSelectedMediaId(media.tmdb_id || media.id)
     setSelectedMediaType(media.media_type)
+    
+    // Check if it's an existing record from the DB
+    if (media.user_rating !== undefined || media.review !== undefined) {
+      setSelectedMediaData({ rating: media.user_rating, review: media.review })
+    } else {
+      setSelectedMediaData(null)
+    }
+    
     setIsModalOpen(true)
   }
 
@@ -155,7 +165,7 @@ export default function DashboardClient({ initialMovies }: { initialMovies: any[
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
           {filteredAndSortedMovies.map(media => (
-            <Card key={media.id} className="overflow-hidden relative group">
+            <Card key={media.id} onClick={() => handleSelectMedia(media)} className="overflow-hidden relative group cursor-pointer">
               <div className="aspect-[2/3] bg-muted relative">
                 {media.poster_path ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -191,6 +201,7 @@ export default function DashboardClient({ initialMovies }: { initialMovies: any[
         isOpen={isModalOpen}
         mediaId={selectedMediaId}
         mediaType={selectedMediaType}
+        initialData={selectedMediaData}
         onClose={() => {
           setIsModalOpen(false)
           window.location.reload()
