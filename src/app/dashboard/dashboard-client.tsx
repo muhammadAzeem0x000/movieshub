@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { MovieSearch } from '@/components/movie-search'
 import { MovieModal } from '@/components/movie-modal'
 import { Input } from '@/components/ui/input'
@@ -10,7 +11,13 @@ import { Star, Filter, ArrowUpDown, Loader2 } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 
 export default function DashboardClient({ initialMovies }: { initialMovies: any[] }) {
+  const router = useRouter()
   const [movies, setMovies] = useState(initialMovies)
+  
+  useEffect(() => {
+    setMovies(initialMovies)
+  }, [initialMovies])
+
   const [selectedMediaId, setSelectedMediaId] = useState<number | null>(null)
   const [selectedMediaType, setSelectedMediaType] = useState<'movie' | 'tv' | null>(null)
   const [selectedMediaData, setSelectedMediaData] = useState<{ rating?: number, review?: string } | null>(null)
@@ -204,7 +211,7 @@ export default function DashboardClient({ initialMovies }: { initialMovies: any[
         initialData={selectedMediaData}
         onClose={() => {
           setIsModalOpen(false)
-          window.location.reload()
+          router.refresh()
         }}
       />
     </div>
