@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import DashboardClient from './dashboard-client'
+import { SettingsModal } from '@/components/settings-modal'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -31,7 +32,7 @@ export default async function DashboardPage() {
             <h1 className="text-xl font-bold">My Movies</h1>
           </div>
           <nav className="flex items-center gap-4">
-            <a href="/settings" className="text-sm font-medium text-muted-foreground hover:text-foreground">Settings</a>
+            <SettingsModal />
             <form action="/login" method="POST">
               <button formAction={async () => {
                 'use server';
