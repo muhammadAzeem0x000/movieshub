@@ -61,7 +61,33 @@ Each object must have the following keys:
     if (!content) throw new Error('No content from OpenAI')
     
     const parsed = JSON.parse(content)
-    return NextResponse.json({ recommendations: parsed.recommendations })
+    const rawRecommendations = parsed.recommendations || []
+
+    const TMDB_API_KEY = process.env.TMDB_API_KEY
+    const enrichedRecs = await Promise.all(rawRecommendations.map(async (rec: any) => {
+      if (!TMDB_API_KEY) return rec
+      try {
+        const searchRes = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(rec.title)}`)
+        const searchData = await searchRes.json()
+        if (searchData.results && searchData.results.length > 0) {
+          const match = searchData.results.find((r: any) => r.media_type === 'movie' || r.media_type === 'tv')
+          if (match) {
+            return {
+              ...rec,
+              tmdb_id: match.id,
+              poster_path: match.poster_path,
+              media_type: match.media_type,
+              title: match.title || match.name // TMDB normalizes it
+            }
+          }
+        }
+      } catch (e) {
+        console.error('Failed to enrich recommendation', rec.title, e)
+      }
+      return { ...rec, media_type: 'movie' } // fallback
+    }))
+
+    return NextResponse.json({ recommendations: enrichedRecs })
   } catch (error: any) {
     console.error('OpenAI Error:', error)
     return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 })

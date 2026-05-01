@@ -107,13 +107,28 @@ export default function DashboardClient({ initialMovies }: { initialMovies: any[
         </div>
         
         {recommendations.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
             {recommendations.map((rec, i) => (
-              <Card key={i} className="flex flex-col">
-                <CardContent className="p-4 flex flex-col h-full gap-2">
-                  <h3 className="font-semibold text-lg line-clamp-1">{rec.title}</h3>
+              <Card key={i} className="flex flex-col overflow-hidden group">
+                <div className="aspect-[2/3] w-full bg-muted relative overflow-hidden">
+                  {rec.poster_path ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={`https://image.tmdb.org/t/p/w342${rec.poster_path}`} alt={rec.title} className="object-cover w-full h-full transition-transform group-hover:scale-105" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <Film className="h-8 w-8 text-muted-foreground" />
+                    </div>
+                  )}
+                  {rec.media_type && (
+                    <div className="absolute top-2 left-2 bg-primary/90 text-primary-foreground px-1.5 py-0.5 rounded-sm text-[10px] font-bold uppercase tracking-wider shadow-sm">
+                      {rec.media_type}
+                    </div>
+                  )}
+                </div>
+                <CardContent className="p-4 flex flex-col h-full gap-2 bg-card">
+                  <h3 className="font-semibold text-lg line-clamp-1" title={rec.title}>{rec.title}</h3>
                   <p className="text-xs text-muted-foreground line-clamp-4 flex-grow">{rec.reason}</p>
-                  <Button variant="secondary" size="sm" className="mt-2 w-full" onClick={() => handleSelectMedia({ id: rec.tmdb_id, title: rec.title, media_type: rec.tmdb_id ? 'movie' : 'movie' })}>
+                  <Button variant="secondary" size="sm" className="mt-3 w-full" onClick={() => handleSelectMedia({ id: rec.tmdb_id, title: rec.title, media_type: rec.media_type })}>
                     Log this
                   </Button>
                 </CardContent>
