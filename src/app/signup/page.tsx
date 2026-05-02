@@ -23,37 +23,41 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-4">
-      <Card className="w-full max-w-sm">
+    <div className="flex min-h-screen items-center justify-center p-4 relative overflow-hidden bg-background">
+      {/* Decorative background elements */}
+      <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-primary/20 blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-blue-500/20 blur-[120px] pointer-events-none" />
+      
+      <Card className="w-full max-w-sm relative z-10 border-primary/20 shadow-2xl backdrop-blur-xl bg-background/80">
         <CardHeader className="space-y-1">
-          <div className="flex justify-center mb-4">
-            <div className="rounded-full bg-primary/10 p-3">
-              <Film className="h-6 w-6 text-primary" />
+          <div className="flex justify-center mb-6">
+            <div className="rounded-2xl bg-gradient-to-tr from-primary to-blue-600 p-4 shadow-lg shadow-primary/30 animate-in zoom-in duration-500">
+              <Film className="h-8 w-8 text-primary-foreground" />
             </div>
           </div>
-          <CardTitle className="text-2xl text-center">Create an account</CardTitle>
-          <CardDescription className="text-center">
+          <CardTitle className="text-2xl text-center font-bold tracking-tight">Create an account</CardTitle>
+          <CardDescription className="text-center text-muted-foreground">
             Enter your email below to create your account
           </CardDescription>
         </CardHeader>
         <form action={handleSubmit}>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" name="email" type="email" placeholder="m@example.com" required />
+              <Label htmlFor="email" className="font-semibold">Email</Label>
+              <Input id="email" name="email" type="email" placeholder="m@example.com" required className="bg-background/50 focus-visible:ring-primary/50" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input id="password" name="password" type="password" required />
+              <Label htmlFor="password" className="font-semibold">Password</Label>
+              <Input id="password" name="password" type="password" required className="bg-background/50 focus-visible:ring-primary/50" />
             </div>
           </CardContent>
-          <CardFooter className="flex flex-col space-y-4">
-            <Button className="w-full" type="submit" disabled={loading}>
+          <CardFooter className="flex flex-col space-y-4 mt-2">
+            <Button className="w-full shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-95" type="submit" disabled={loading}>
               {loading ? "Creating account..." : "Sign up"}
             </Button>
             <div className="text-sm text-center text-muted-foreground">
               Already have an account?{" "}
-              <Link href="/login" className="text-primary hover:underline">
+              <Link href="/login" className="text-primary font-semibold hover:underline underline-offset-4 transition-all">
                 Sign in
               </Link>
             </div>

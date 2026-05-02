@@ -3,6 +3,9 @@ import { redirect } from 'next/navigation'
 import DashboardClient from './dashboard-client'
 import { SettingsModal } from '@/components/settings-modal'
 
+import { LogOut } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+
 export default async function DashboardPage() {
   const supabase = await createClient()
 
@@ -23,15 +26,15 @@ export default async function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="rounded-full bg-primary/10 p-2">
+            <div className="rounded-full bg-primary/10 p-2 shadow-sm">
               <span className="font-bold text-primary">MT</span>
             </div>
-            <h1 className="text-xl font-bold">My Movies</h1>
+            <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/60">MoviesHub</h1>
           </div>
-          <nav className="flex items-center gap-4">
+          <nav className="flex items-center gap-2 sm:gap-4">
             <SettingsModal />
             <form action="/login" method="POST">
               <button formAction={async () => {
@@ -39,8 +42,9 @@ export default async function DashboardPage() {
                 const supabase = await createClient()
                 await supabase.auth.signOut()
                 redirect('/login')
-              }} className="text-sm font-medium text-muted-foreground hover:text-foreground">
-                Sign Out
+              }} className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2 text-destructive hover:text-destructive hover:bg-destructive/10">
+                <LogOut className="w-4 h-4" />
+                <span className="hidden sm:inline">Sign Out</span>
               </button>
             </form>
           </nav>
