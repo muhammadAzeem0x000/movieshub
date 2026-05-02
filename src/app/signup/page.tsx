@@ -10,6 +10,8 @@ import Link from 'next/link'
 import { Film } from 'lucide-react'
 import { toast } from 'sonner'
 
+import Image from 'next/image'
+
 export default function SignupPage() {
   const [loading, setLoading] = useState(false)
 
@@ -31,8 +33,9 @@ export default function SignupPage() {
       <Card className="w-full max-w-sm relative z-10 border-primary/20 shadow-2xl backdrop-blur-xl bg-background/80">
         <CardHeader className="space-y-1">
           <div className="flex justify-center mb-6">
-            <div className="rounded-2xl bg-gradient-to-tr from-primary to-blue-600 p-4 shadow-lg shadow-primary/30 animate-in zoom-in duration-500">
-              <Film className="h-8 w-8 text-primary-foreground" />
+            <div className="rounded-2xl p-2 animate-in zoom-in duration-500">
+              <Image src="/logo/dark-logo.png" alt="MoviesHub Logo" width={80} height={80} className="dark:hidden object-contain" />
+              <Image src="/logo/white-logo.png" alt="MoviesHub Logo" width={80} height={80} className="hidden dark:block object-contain" />
             </div>
           </div>
           <CardTitle className="text-2xl text-center font-bold tracking-tight">Create an account</CardTitle>

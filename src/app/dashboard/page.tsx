@@ -5,6 +5,7 @@ import { SettingsModal } from '@/components/settings-modal'
 
 import { LogOut } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import Image from 'next/image'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -28,10 +29,9 @@ export default async function DashboardPage() {
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="rounded-full bg-primary/10 p-2 shadow-sm">
-              <span className="font-bold text-primary">MT</span>
-            </div>
+          <div className="flex items-center gap-3">
+            <Image src="/logo/dark-logo.png" alt="MoviesHub Logo" width={32} height={32} className="dark:hidden object-contain" />
+            <Image src="/logo/white-logo.png" alt="MoviesHub Logo" width={32} height={32} className="hidden dark:block object-contain" />
             <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/60">MoviesHub</h1>
           </div>
           <nav className="flex items-center gap-2 sm:gap-4">
