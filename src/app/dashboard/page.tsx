@@ -30,9 +30,11 @@ export default async function DashboardPage() {
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Image src="/logo/dark-logo.png" alt="MoviesHub Logo" width={32} height={32} className="dark:hidden object-contain rounded-full bg-primary/5 p-0.5" />
-            <Image src="/logo/white-logo.png" alt="MoviesHub Logo" width={32} height={32} className="hidden dark:block object-contain rounded-full bg-primary/5 p-0.5" />
-            <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/60">MoviesHub</h1>
+            <div className="h-12 w-auto flex items-center justify-center rounded-xl overflow-hidden shadow-sm">
+              <Image src="/logo/dark-logo.png" alt="MoviesHub Logo" width={160} height={48} className="dark:hidden w-auto h-full object-contain" priority />
+              <Image src="/logo/white-logo.png" alt="MoviesHub Logo" width={160} height={48} className="hidden dark:block w-auto h-full object-contain" priority />
+            </div>
+            <h1 className="text-xl md:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/60">MoviesHub</h1>
           </div>
           <nav className="flex items-center gap-2 sm:gap-4">
             <SettingsModal />

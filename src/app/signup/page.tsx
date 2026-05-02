@@ -32,10 +32,10 @@ export default function SignupPage() {
       
       <Card className="w-full max-w-sm relative z-10 border-primary/20 shadow-2xl backdrop-blur-xl bg-background/80">
         <CardHeader className="space-y-1">
-          <div className="flex justify-center mb-6">
-            <div className="rounded-full p-2 animate-in zoom-in duration-500 overflow-hidden shadow-lg shadow-primary/10 bg-background">
-              <Image src="/logo/dark-logo.png" alt="MoviesHub Logo" width={80} height={80} className="dark:hidden object-contain rounded-full" />
-              <Image src="/logo/white-logo.png" alt="MoviesHub Logo" width={80} height={80} className="hidden dark:block object-contain rounded-full" />
+          <div className="flex justify-center mb-8">
+            <div className="h-20 sm:h-24 w-auto flex items-center justify-center rounded-2xl overflow-hidden shadow-xl shadow-primary/10">
+              <Image src="/logo/dark-logo.png" alt="MoviesHub Logo" width={300} height={96} className="dark:hidden w-auto h-full object-contain" priority />
+              <Image src="/logo/white-logo.png" alt="MoviesHub Logo" width={300} height={96} className="hidden dark:block w-auto h-full object-contain" priority />
             </div>
           </div>
           <CardTitle className="text-2xl text-center font-bold tracking-tight">Create an account</CardTitle>
