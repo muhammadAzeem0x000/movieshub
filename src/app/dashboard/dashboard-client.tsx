@@ -153,11 +153,18 @@ export default function DashboardClient({ initialMovies }: { initialMovies: any[
                 </Card>
               ))}
             </div>
-            {recommendations.length > visibleRecsCount && (
-              <div className="flex justify-center mt-4">
-                <Button variant="outline" onClick={() => setVisibleRecsCount(prev => prev + 5)}>
-                  Show More
-                </Button>
+            {(recommendations.length > visibleRecsCount || visibleRecsCount > 5) && (
+              <div className="flex justify-center mt-4 gap-2">
+                {recommendations.length > visibleRecsCount && (
+                  <Button variant="outline" onClick={() => setVisibleRecsCount(prev => prev + 5)}>
+                    Show More
+                  </Button>
+                )}
+                {visibleRecsCount > 5 && (
+                  <Button variant="outline" onClick={() => setVisibleRecsCount(5)}>
+                    Show Less
+                  </Button>
+                )}
               </div>
             )}
           </>
