@@ -59,3 +59,45 @@ ALTER POLICY "Users can view their own movies" ON public.user_media RENAME TO "U
 ALTER POLICY "Users can insert their own movies" ON public.user_media RENAME TO "Users can insert their own media";
 ALTER POLICY "Users can update their own movies" ON public.user_media RENAME TO "Users can update their own media";
 ALTER POLICY "Users can delete their own movies" ON public.user_media RENAME TO "Users can delete their own media";
+
+
+-- ==============================================
+-- NEW FEATURE: Persistent AI Recommendations
+-- ==============================================
+
+-- Create user_recommendations table
+CREATE TABLE public.user_recommendations (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    tmdb_id INTEGER NOT NULL,
+    media_type TEXT NOT NULL,
+    title TEXT NOT NULL,
+    poster_path TEXT,
+    reason TEXT,
+    status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'logged', 'dismissed')),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+);
+
+-- Enable Row Level Security (RLS)
+ALTER TABLE public.user_recommendations ENABLE ROW LEVEL SECURITY;
+
+-- Create index for faster queries
+CREATE INDEX idx_user_recommendations_user_id ON public.user_recommendations(user_id);
+CREATE INDEX idx_user_recommendations_status ON public.user_recommendations(status);
+
+-- Create policies
+CREATE POLICY "Users can view their own recommendations"
+    ON public.user_recommendations FOR SELECT
+    USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert their own recommendations"
+    ON public.user_recommendations FOR INSERT
+    WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update their own recommendations"
+    ON public.user_recommendations FOR UPDATE
+    USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete their own recommendations"
+    ON public.user_recommendations FOR DELETE
+    USING (auth.uid() = user_id);

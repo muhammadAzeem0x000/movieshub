@@ -29,6 +29,40 @@ export default function DashboardClient({ initialMovies }: { initialMovies: any[
 
   const [recommendations, setRecommendations] = useState<any[]>([])
   const [loadingRecs, setLoadingRecs] = useState(false)
+  const [visibleRecsCount, setVisibleRecsCount] = useState(5)
+
+  const fetchRecommendations = async () => {
+    setLoadingRecs(true)
+    try {
+      const res = await fetch('/api/recommend')
+      const data = await res.json()
+      if (data.recommendations) {
+        setRecommendations(data.recommendations)
+      } else if (data.error) {
+        console.error('Error fetching recs:', data.error)
+      }
+    } catch (error) {
+      console.error('Failed to get recs', error)
+    } finally {
+      setLoadingRecs(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchRecommendations()
+  }, [])
+
+  const regenerateRecommendations = async () => {
+    setLoadingRecs(true)
+    try {
+      await fetch('/api/recommend/regenerate', { method: 'POST' })
+      await fetchRecommendations()
+      setVisibleRecsCount(5)
+    } catch (error) {
+      console.error('Failed to regenerate recs', error)
+      setLoadingRecs(false)
+    }
+  }
 
   const handleSelectMedia = (media: any) => {
     // media.tmdb_id exists if it comes from the DB, media.id is the TMDB ID if it comes from the search API
@@ -71,23 +105,6 @@ export default function DashboardClient({ initialMovies }: { initialMovies: any[
     return result
   }, [movies, typeFilter, genreFilter, sortBy])
 
-  const generateRecommendations = async () => {
-    setLoadingRecs(true)
-    try {
-      const res = await fetch('/api/recommend')
-      const data = await res.json()
-      if (data.recommendations) {
-        setRecommendations(data.recommendations)
-      } else if (data.error) {
-        console.error('Error generating recs:', data.error)
-      }
-    } catch (error) {
-      console.error('Failed to get recs', error)
-    } finally {
-      setLoadingRecs(false)
-    }
-  }
-
   return (
     <div className="space-y-8">
       {/* Search Section */}
@@ -100,45 +117,59 @@ export default function DashboardClient({ initialMovies }: { initialMovies: any[
       <section className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-bold">Suggested for You</h2>
-          <Button onClick={generateRecommendations} disabled={loadingRecs} variant="outline">
+          <Button onClick={regenerateRecommendations} disabled={loadingRecs} variant="outline">
             {loadingRecs && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Generate
+            Regenerate Recommendations
           </Button>
         </div>
         
         {recommendations.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-            {recommendations.map((rec, i) => (
-              <Card key={i} className="flex flex-col overflow-hidden group">
-                <div className="aspect-[2/3] w-full bg-muted relative overflow-hidden">
-                  {rec.poster_path ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={`https://image.tmdb.org/t/p/w342${rec.poster_path}`} alt={rec.title} className="object-cover w-full h-full transition-transform group-hover:scale-105" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <Film className="h-8 w-8 text-muted-foreground" />
-                    </div>
-                  )}
-                  {rec.media_type && (
-                    <div className="absolute top-2 left-2 bg-primary/90 text-primary-foreground px-1.5 py-0.5 rounded-sm text-[10px] font-bold uppercase tracking-wider shadow-sm">
-                      {rec.media_type}
-                    </div>
-                  )}
-                </div>
-                <CardContent className="p-4 flex flex-col h-full gap-2 bg-card">
-                  <h3 className="font-semibold text-lg line-clamp-1" title={rec.title}>{rec.title}</h3>
-                  <p className="text-xs text-muted-foreground line-clamp-4 flex-grow">{rec.reason}</p>
-                  <Button variant="secondary" size="sm" className="mt-3 w-full" onClick={() => handleSelectMedia({ id: rec.tmdb_id, title: rec.title, media_type: rec.media_type })}>
-                    Log this
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+              {recommendations.slice(0, visibleRecsCount).map((rec, i) => (
+                <Card key={rec.id || i} className="flex flex-col overflow-hidden group">
+                  <div className="aspect-[2/3] w-full bg-muted relative overflow-hidden">
+                    {rec.poster_path ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={`https://image.tmdb.org/t/p/w342${rec.poster_path}`} alt={rec.title} className="object-cover w-full h-full transition-transform group-hover:scale-105" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Film className="h-8 w-8 text-muted-foreground" />
+                      </div>
+                    )}
+                    {rec.media_type && (
+                      <div className="absolute top-2 left-2 bg-primary/90 text-primary-foreground px-1.5 py-0.5 rounded-sm text-[10px] font-bold uppercase tracking-wider shadow-sm">
+                        {rec.media_type}
+                      </div>
+                    )}
+                  </div>
+                  <CardContent className="p-4 flex flex-col h-full gap-2 bg-card">
+                    <h3 className="font-semibold text-lg line-clamp-1" title={rec.title}>{rec.title}</h3>
+                    <p className="text-xs text-muted-foreground line-clamp-4 flex-grow">{rec.reason}</p>
+                    <Button variant="secondary" size="sm" className="mt-3 w-full" onClick={() => handleSelectMedia({ id: rec.tmdb_id, title: rec.title, media_type: rec.media_type })}>
+                      Log this
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+            {recommendations.length > visibleRecsCount && (
+              <div className="flex justify-center mt-4">
+                <Button variant="outline" onClick={() => setVisibleRecsCount(prev => prev + 5)}>
+                  Show More
+                </Button>
+              </div>
+            )}
+          </>
         )}
         {recommendations.length === 0 && !loadingRecs && (
           <div className="p-8 text-center text-muted-foreground border rounded-lg border-dashed">
-            Click &quot;Generate&quot; to get AI recommendations based on your highly rated titles.
+            Click &quot;Regenerate Recommendations&quot; to get AI recommendations based on your highly rated titles.
+          </div>
+        )}
+        {recommendations.length === 0 && loadingRecs && (
+          <div className="flex justify-center items-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
           </div>
         )}
       </section>
@@ -227,6 +258,7 @@ export default function DashboardClient({ initialMovies }: { initialMovies: any[
         onClose={() => {
           setIsModalOpen(false)
           router.refresh()
+          fetchRecommendations()
         }}
       />
     </div>

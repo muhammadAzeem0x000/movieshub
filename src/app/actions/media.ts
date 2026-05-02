@@ -59,6 +59,14 @@ export async function saveMedia(data: {
     return { error: 'Failed to save movie' }
   }
 
+  // Also check if this item is in the user's active recommendations, and mark it as 'logged'
+  await supabase
+    .from('user_recommendations')
+    .update({ status: 'logged' })
+    .eq('user_id', user.id)
+    .eq('tmdb_id', data.tmdb_id)
+    .eq('status', 'active')
+
   revalidatePath('/dashboard')
   return { success: true }
 }
