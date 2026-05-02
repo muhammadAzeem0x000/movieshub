@@ -125,7 +125,7 @@ export default function DashboardClient({ initialMovies }: { initialMovies: any[
         
         {recommendations.length > 0 && (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
               {recommendations.slice(0, visibleRecsCount).map((rec, i) => (
                 <Card key={rec.id || i} className="flex flex-col overflow-hidden group">
                   <div className="aspect-[2/3] w-full bg-muted relative overflow-hidden">
@@ -143,10 +143,10 @@ export default function DashboardClient({ initialMovies }: { initialMovies: any[
                       </div>
                     )}
                   </div>
-                  <CardContent className="p-4 flex flex-col h-full gap-2 bg-card">
-                    <h3 className="font-semibold text-lg line-clamp-1" title={rec.title}>{rec.title}</h3>
-                    <p className="text-xs text-muted-foreground line-clamp-4 flex-grow">{rec.reason}</p>
-                    <Button variant="secondary" size="sm" className="mt-3 w-full" onClick={() => handleSelectMedia({ id: rec.tmdb_id, title: rec.title, media_type: rec.media_type })}>
+                  <CardContent className="p-3 flex flex-col flex-grow gap-2 bg-card">
+                    <h3 className="font-semibold text-sm sm:text-base line-clamp-1" title={rec.title}>{rec.title}</h3>
+                    <p className="text-xs text-muted-foreground line-clamp-3 sm:line-clamp-4">{rec.reason}</p>
+                    <Button variant="default" size="sm" className="mt-auto w-full font-semibold shadow-sm" onClick={() => handleSelectMedia({ id: rec.tmdb_id, title: rec.title, media_type: rec.media_type })}>
                       Log this
                     </Button>
                   </CardContent>
