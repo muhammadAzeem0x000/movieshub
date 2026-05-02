@@ -7,7 +7,7 @@ import { MovieModal } from '@/components/movie-modal'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { Star, Filter, ArrowUpDown, Loader2 } from 'lucide-react'
+import { Star, Filter, ArrowUpDown, Loader2, Film } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 
 export default function DashboardClient({ initialMovies }: { initialMovies: any[] }) {
