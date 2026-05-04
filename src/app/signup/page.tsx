@@ -9,11 +9,13 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import Link from 'next/link'
 import { Film } from 'lucide-react'
 import { toast } from 'sonner'
-
+import { Loader2 } from 'lucide-react'
 import Image from 'next/image'
 
 export default function SignupPage() {
   const [loading, setLoading] = useState(false)
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
 
   async function handleSubmit(formData: FormData) {
     setLoading(true)
@@ -47,16 +49,16 @@ export default function SignupPage() {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email" className="font-semibold">Email</Label>
-              <Input id="email" name="email" type="email" placeholder="m@example.com" required className="bg-background/50 focus-visible:ring-primary/50" />
+              <Input id="email" name="email" type="email" placeholder="m@example.com" required className="bg-background/50 focus-visible:ring-primary/50" value={email} onChange={(e) => setEmail(e.target.value)} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="password" className="font-semibold">Password</Label>
-              <Input id="password" name="password" type="password" required className="bg-background/50 focus-visible:ring-primary/50" />
+              <Input id="password" name="password" type="password" required className="bg-background/50 focus-visible:ring-primary/50" value={password} onChange={(e) => setPassword(e.target.value)} />
             </div>
           </CardContent>
           <CardFooter className="flex flex-col space-y-4 mt-2">
-            <Button className="w-full shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-95" type="submit" disabled={loading}>
-              {loading ? "Creating account..." : "Sign up"}
+            <Button className="w-full shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-95" type="submit" disabled={loading || !email || !password}>
+              {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating account...</> : "Sign up"}
             </Button>
             <div className="text-sm text-center text-muted-foreground">
               Already have an account?{" "}
