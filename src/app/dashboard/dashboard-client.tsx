@@ -47,7 +47,9 @@ export default function DashboardClient({ initialMovies, initialRecommendations 
       if (data.recommendations) {
         setRecommendations(data.recommendations)
       } else if (data.error) {
-        console.error('Error fetching recs:', data.error)
+        if (data.error !== "Not enough highly rated titles to generate recommendations.") {
+          console.error('Error fetching recs:', data.error)
+        }
       }
     } catch (error) {
       console.error('Failed to get recs', error)
