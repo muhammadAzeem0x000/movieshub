@@ -45,7 +45,16 @@ export default function LoginPage() {
             Enter your email to sign in to your account
           </CardDescription>
         </CardHeader>
-        <form action={handleSubmit}>
+        <form onSubmit={async (e) => {
+          e.preventDefault()
+          setLoading(true)
+          const formData = new FormData(e.currentTarget)
+          const result = await login(formData)
+          if (result?.error) {
+            toast.error(result.error)
+            setLoading(false)
+          }
+        }}>
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email" className="font-semibold">Email</Label>
@@ -57,7 +66,7 @@ export default function LoginPage() {
             </div>
           </CardContent>
           <CardFooter className="flex flex-col space-y-4 mt-2">
-            <Button className="w-full shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-95" type="submit" disabled={loading || !email || !password}>
+            <Button className="w-full shadow-lg shadow-primary/20 transition-colors" type="submit" disabled={loading || !email || !password}>
               {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Signing in...</> : "Sign in"}
             </Button>
             <div className="text-sm text-center text-muted-foreground">
