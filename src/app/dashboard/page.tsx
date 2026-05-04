@@ -25,6 +25,16 @@ export default async function DashboardPage() {
     console.error('Error fetching movies:', error)
   }
 
+  const { data: recommendations, error: recError } = await supabase
+    .from('user_recommendations')
+    .select('*')
+    .eq('status', 'active')
+    .order('created_at', { ascending: false })
+
+  if (recError) {
+    console.error('Error fetching recommendations:', recError)
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -54,7 +64,7 @@ export default async function DashboardPage() {
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        <DashboardClient initialMovies={movies || []} />
+        <DashboardClient initialMovies={movies || []} initialRecommendations={recommendations || []} />
       </main>
     </div>
   )

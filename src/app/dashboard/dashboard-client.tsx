@@ -10,7 +10,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Star, Filter, ArrowUpDown, Loader2, Film } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 
-export default function DashboardClient({ initialMovies }: { initialMovies: any[] }) {
+export default function DashboardClient({ initialMovies, initialRecommendations = [] }: { initialMovies: any[], initialRecommendations?: any[] }) {
   const router = useRouter()
   const [movies, setMovies] = useState(initialMovies)
   
@@ -27,9 +27,17 @@ export default function DashboardClient({ initialMovies }: { initialMovies: any[
   const [typeFilter, setTypeFilter] = useState<'All' | 'movie' | 'tv'>('All')
   const [sortBy, setSortBy] = useState<'recent' | 'rating'>('recent')
 
-  const [recommendations, setRecommendations] = useState<any[]>([])
+  const [recommendations, setRecommendations] = useState<any[]>(initialRecommendations)
   const [loadingRecs, setLoadingRecs] = useState(false)
   const [visibleRecsCount, setVisibleRecsCount] = useState(5)
+
+  useEffect(() => {
+    setRecommendations(initialRecommendations)
+    if (initialRecommendations.length > 0 && initialRecommendations.length < 5) {
+      // Auto-replenish in the background if we drop below 5
+      fetchRecommendations()
+    }
+  }, [initialRecommendations])
 
   const fetchRecommendations = async () => {
     setLoadingRecs(true)
@@ -49,7 +57,9 @@ export default function DashboardClient({ initialMovies }: { initialMovies: any[
   }
 
   useEffect(() => {
-    fetchRecommendations()
+    if (initialRecommendations.length === 0) {
+      fetchRecommendations()
+    }
   }, [])
 
   const regenerateRecommendations = async () => {
