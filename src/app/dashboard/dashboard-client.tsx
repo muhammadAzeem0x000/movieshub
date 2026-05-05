@@ -159,7 +159,7 @@ export default function DashboardClient({ initialMovies, initialRecommendations 
                     <h3 className="font-semibold text-sm sm:text-base line-clamp-1" title={rec.title}>{rec.title}</h3>
                     <p className="text-xs text-muted-foreground line-clamp-3 sm:line-clamp-4">{rec.reason}</p>
                     <Button variant="default" size="sm" className="mt-auto w-full font-semibold shadow-sm" onClick={() => handleSelectMedia({ id: rec.tmdb_id, title: rec.title, media_type: rec.media_type })}>
-                      Log this
+                      Watched
                     </Button>
                   </CardContent>
                 </Card>
