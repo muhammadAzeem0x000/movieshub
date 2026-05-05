@@ -7,7 +7,7 @@ import { MovieModal } from '@/components/movie-modal'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { Star, Filter, ArrowUpDown, Loader2, Film } from 'lucide-react'
+import { Star, Filter, ArrowUpDown, Loader2, Film, Sparkles } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 
 export default function DashboardClient({ initialMovies, initialRecommendations = [] }: { initialMovies: any[], initialRecommendations?: any[] }) {
@@ -129,9 +129,9 @@ export default function DashboardClient({ initialMovies, initialRecommendations 
       <section className="bg-gradient-to-tr from-card to-blue-500/5 p-6 md:p-8 rounded-2xl border shadow-sm space-y-6">
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-cyan-500">Suggested for You</h2>
-          <Button onClick={regenerateRecommendations} disabled={loadingRecs} variant="outline">
-            {loadingRecs && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Regenerate Recommendations
+          <Button onClick={regenerateRecommendations} disabled={loadingRecs} className="bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white shadow-md hover:shadow-lg transition-all rounded-full px-6 font-semibold border-0">
+            {loadingRecs ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+            {loadingRecs ? "Regenerating..." : "Regenerate Recommendations"}
           </Button>
         </div>
         

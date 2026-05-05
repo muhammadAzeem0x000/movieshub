@@ -56,8 +56,8 @@ export function MovieSearch({ onSelectMedia }: MediaSearchProps) {
 
   return (
     <div className="relative w-full max-w-md mx-auto">
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+      <div className="relative shadow-lg rounded-full overflow-hidden bg-background/50 border border-primary/20 focus-within:ring-2 focus-within:ring-primary/50 focus-within:border-primary transition-all">
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-primary" />
         <Input
           type="text"
           placeholder="Search for movies or TV shows..."
@@ -68,10 +68,10 @@ export function MovieSearch({ onSelectMedia }: MediaSearchProps) {
           }}
           onFocus={() => setShowResults(true)}
           onBlur={() => setTimeout(() => setShowResults(false), 200)}
-          className="pl-10"
+          className="pl-12 py-6 text-base md:text-lg border-0 bg-transparent shadow-none focus-visible:ring-0 placeholder:text-muted-foreground/70"
         />
         {loading && (
-          <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
+          <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 animate-spin text-primary" />
         )}
       </div>
 
