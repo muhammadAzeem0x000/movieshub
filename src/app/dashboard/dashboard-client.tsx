@@ -120,15 +120,15 @@ export default function DashboardClient({ initialMovies, initialRecommendations 
   return (
     <div className="space-y-8">
       {/* Search Section */}
-      <section className="bg-card p-6 rounded-lg border shadow-sm flex flex-col items-center justify-center min-h-[200px]">
-        <h2 className="text-2xl font-bold mb-6">Log a New Movie or TV Show</h2>
+      <section className="bg-gradient-to-br from-card to-primary/5 p-8 rounded-2xl border shadow-md flex flex-col items-center justify-center min-h-[200px]">
+        <h2 className="text-3xl font-extrabold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">Log a New Movie or TV Show</h2>
         <MovieSearch onSelectMedia={handleSelectMedia} />
       </section>
 
       {/* AI Recommendations Section */}
-      <section className="space-y-4">
+      <section className="bg-gradient-to-tr from-card to-blue-500/5 p-6 md:p-8 rounded-2xl border shadow-sm space-y-6">
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold">Suggested for You</h2>
+          <h2 className="text-2xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-cyan-500">Suggested for You</h2>
           <Button onClick={regenerateRecommendations} disabled={loadingRecs} variant="outline">
             {loadingRecs && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Regenerate Recommendations
@@ -194,9 +194,9 @@ export default function DashboardClient({ initialMovies, initialRecommendations 
       </section>
 
       {/* Movies Grid Section */}
-      <section className="space-y-4">
+      <section className="bg-gradient-to-br from-card to-green-500/5 p-6 md:p-8 rounded-2xl border shadow-sm space-y-6">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          <h2 className="text-2xl font-bold">Your Watched Titles ({filteredAndSortedMovies.length})</h2>
+          <h2 className="text-2xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-emerald-500 to-green-500">Your Watched Titles ({filteredAndSortedMovies.length})</h2>
           
           <div className="flex items-center gap-2">
             <DropdownMenu>
