@@ -127,11 +127,11 @@ export default function DashboardClient({ initialMovies, initialRecommendations 
 
       {/* AI Recommendations Section */}
       <section className="bg-gradient-to-tr from-card to-blue-500/5 p-6 md:p-8 rounded-2xl border shadow-sm space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <h2 className="text-2xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-cyan-500">Suggested for You</h2>
-          <Button onClick={regenerateRecommendations} disabled={loadingRecs} className="bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white shadow-md hover:shadow-lg transition-all rounded-full px-6 font-semibold border-0">
-            {loadingRecs ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-            {loadingRecs ? "Regenerating..." : "Regenerate Recommendations"}
+          <Button onClick={regenerateRecommendations} disabled={loadingRecs} className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white shadow-md hover:shadow-lg transition-all rounded-full px-6 font-semibold border-0">
+            {loadingRecs ? <Loader2 className="mr-2 h-4 w-4 animate-spin shrink-0" /> : <Sparkles className="mr-2 h-4 w-4 shrink-0" />}
+            <span className="truncate">{loadingRecs ? "Regenerating..." : "Regenerate Recommendations"}</span>
           </Button>
         </div>
         
@@ -195,13 +195,13 @@ export default function DashboardClient({ initialMovies, initialRecommendations 
 
       {/* Movies Grid Section */}
       <section className="bg-gradient-to-br from-card to-green-500/5 p-6 md:p-8 rounded-2xl border shadow-sm space-y-6">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <h2 className="text-2xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-emerald-500 to-green-500">Your Watched Titles ({filteredAndSortedMovies.length})</h2>
           
-          <div className="flex items-center gap-2">
+          <div className="grid grid-cols-2 sm:flex sm:flex-row items-center gap-2 w-full md:w-auto">
             <DropdownMenu>
-              <DropdownMenuTrigger className="inline-flex items-center justify-between whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-8 px-3 w-[140px]">
-                <span className="flex items-center"><Filter className="mr-2 h-4 w-4" /> {typeFilter === 'All' ? 'All Types' : typeFilter === 'movie' ? 'Movies' : 'TV Shows'}</span>
+              <DropdownMenuTrigger className="inline-flex items-center justify-between whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-8 px-3 w-full sm:w-[130px] md:w-[140px]">
+                <span className="flex items-center truncate"><Filter className="mr-2 h-4 w-4 shrink-0" /> <span className="truncate ml-1">{typeFilter === 'All' ? 'All Types' : typeFilter === 'movie' ? 'Movies' : 'TV Shows'}</span></span>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
                 <DropdownMenuItem onClick={() => setTypeFilter('All')}>All Types</DropdownMenuItem>
@@ -211,8 +211,8 @@ export default function DashboardClient({ initialMovies, initialRecommendations 
             </DropdownMenu>
 
             <DropdownMenu>
-              <DropdownMenuTrigger className="inline-flex items-center justify-between whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-8 px-3 w-[140px]">
-                <span className="flex items-center"><Filter className="mr-2 h-4 w-4" /> {genreFilter}</span>
+              <DropdownMenuTrigger className="inline-flex items-center justify-between whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-8 px-3 w-full sm:w-[130px] md:w-[140px]">
+                <span className="flex items-center truncate"><Filter className="mr-2 h-4 w-4 shrink-0" /> <span className="truncate ml-1">{genreFilter}</span></span>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="max-h-[300px] overflow-y-auto">
                 {allGenres.map(genre => (
@@ -224,8 +224,8 @@ export default function DashboardClient({ initialMovies, initialRecommendations 
             </DropdownMenu>
 
             <DropdownMenu>
-              <DropdownMenuTrigger className="inline-flex items-center justify-between whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-8 px-3 w-[140px]">
-                <span className="flex items-center"><ArrowUpDown className="mr-2 h-4 w-4" /> {sortBy === 'recent' ? 'Recent' : 'Rating'}</span>
+              <DropdownMenuTrigger className="col-span-2 sm:col-span-1 inline-flex items-center justify-between whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-8 px-3 w-full sm:w-[130px] md:w-[140px]">
+                <span className="flex items-center truncate"><ArrowUpDown className="mr-2 h-4 w-4 shrink-0" /> <span className="truncate ml-1">{sortBy === 'recent' ? 'Recent' : 'Rating'}</span></span>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
                 <DropdownMenuItem onClick={() => setSortBy('recent')}>Recent</DropdownMenuItem>

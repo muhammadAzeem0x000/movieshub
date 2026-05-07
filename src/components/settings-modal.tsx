@@ -86,7 +86,7 @@ export function SettingsModal() {
               <h3 className="font-medium text-lg">Appearance</h3>
               <p className="text-sm text-muted-foreground">Customize the theme of your application.</p>
             </div>
-            <div className="mt-4 sm:mt-0 flex items-center gap-2 border rounded-lg p-1 bg-muted/50">
+            <div className="mt-4 sm:mt-0 grid grid-cols-3 gap-1 border rounded-lg p-1 bg-muted/50 w-full sm:w-auto sm:flex sm:gap-2">
               <Button
                 variant={theme === 'light' ? 'default' : 'ghost'}
                 size="sm"
@@ -119,7 +119,7 @@ export function SettingsModal() {
               <h3 className="font-medium text-lg">Export Data</h3>
               <p className="text-sm text-muted-foreground">Download all your saved media as a CSV file.</p>
             </div>
-            <Button onClick={handleExport} disabled={exporting} className="mt-4 sm:mt-0">
+            <Button onClick={handleExport} disabled={exporting} className="mt-4 sm:mt-0 w-full sm:w-auto">
               {exporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
               Export CSV
             </Button>
@@ -131,7 +131,7 @@ export function SettingsModal() {
                 <h3 className="font-medium text-lg text-destructive">Danger Zone</h3>
                 <p className="text-sm text-muted-foreground">Permanently delete your account and all data.</p>
               </div>
-              <Button variant="destructive" onClick={() => setIsDeleteDialogOpen(true)} className="mt-4 sm:mt-0 shadow-sm">
+              <Button variant="destructive" onClick={() => setIsDeleteDialogOpen(true)} className="mt-4 sm:mt-0 w-full sm:w-auto shadow-sm">
                 <AlertTriangle className="mr-2 h-4 w-4" />
                 Delete Account
               </Button>
@@ -140,9 +140,9 @@ export function SettingsModal() {
              <div className="p-4 border border-destructive bg-destructive/10 rounded-lg animate-in fade-in zoom-in-95 duration-200 shadow-sm">
                 <h3 className="font-bold text-destructive flex items-center"><AlertTriangle className="mr-2 h-5 w-5" /> Are you absolutely sure?</h3>
                 <p className="text-sm mt-1 mb-4 text-muted-foreground">This action cannot be undone. This will permanently delete your account and remove your data from our servers.</p>
-                <div className="flex justify-end gap-2">
-                  <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)} disabled={deleting}>Cancel</Button>
-                  <Button variant="destructive" onClick={handleDelete} disabled={deleting} className="shadow-sm">
+                <div className="flex flex-col sm:flex-row justify-end gap-2">
+                  <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)} disabled={deleting} className="w-full sm:w-auto">Cancel</Button>
+                  <Button variant="destructive" onClick={handleDelete} disabled={deleting} className="w-full sm:w-auto shadow-sm">
                     {deleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Yes, delete my account
                   </Button>
