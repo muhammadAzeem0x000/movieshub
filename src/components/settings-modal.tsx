@@ -39,7 +39,7 @@ export function SettingsModal() {
     }
 
     if (result.csv) {
-      const blob = new Blob([result.csv], { type: 'text/csv;charset=utf-8;' })
+      const blob = new Blob(['\ufeff' + result.csv], { type: 'text/csv;charset=utf-8;' })
       const link = document.createElement('a')
       const url = URL.createObjectURL(blob)
       link.setAttribute('href', url)

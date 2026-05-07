@@ -24,9 +24,18 @@ export async function exportData() {
 
   const headers = Object.keys(data[0]).join(',')
   const csv = data.map(row => 
-    Object.values(row).map(v => 
-      typeof v === 'string' ? `"${v.replace(/"/g, '""')}"` : v
-    ).join(',')
+    Object.values(row).map(v => {
+      if (v === null || v === undefined) return '""'
+      let strVal = ''
+      if (Array.isArray(v)) {
+        strVal = v.join(', ')
+      } else if (typeof v === 'object') {
+        strVal = JSON.stringify(v)
+      } else {
+        strVal = String(v)
+      }
+      return `"${strVal.replace(/"/g, '""')}"`
+    }).join(',')
   ).join('\n')
 
   return { csv: `${headers}\n${csv}` }
