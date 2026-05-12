@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Star, Filter, ArrowUpDown, Loader2, Film, Sparkles, MoreVertical, Trash2, Edit } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { deleteMedia } from '@/app/actions/media'
 import { toast } from 'sonner'
 
@@ -26,6 +27,7 @@ export default function DashboardClient({ initialMovies, initialRecommendations 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [initialModalMode, setInitialModalMode] = useState<'view' | 'edit'>('edit')
   const [deletingId, setDeletingId] = useState<number | null>(null)
+  const [itemToDelete, setItemToDelete] = useState<{ id: number, title: string } | null>(null)
   
   const [genreFilter, setGenreFilter] = useState<string>('All')
   const [typeFilter, setTypeFilter] = useState<'All' | 'movie' | 'tv'>('All')
@@ -96,11 +98,17 @@ export default function DashboardClient({ initialMovies, initialRecommendations 
     setIsModalOpen(true)
   }
 
-  const handleDelete = async (e: React.MouseEvent, tmdb_id: number) => {
+  const confirmDelete = (e: React.MouseEvent, media: any) => {
     e.stopPropagation()
-    if (!confirm('Are you sure you want to delete this title?')) return
-    setDeletingId(tmdb_id)
-    const result = await deleteMedia(tmdb_id)
+    setItemToDelete({ id: media.tmdb_id, title: media.title })
+  }
+
+  const executeDelete = async () => {
+    if (!itemToDelete) return
+    const id = itemToDelete.id
+    setItemToDelete(null)
+    setDeletingId(id)
+    const result = await deleteMedia(id)
     if (result.error) toast.error(result.error)
     else toast.success('Title deleted successfully')
     setDeletingId(null)
@@ -278,7 +286,7 @@ export default function DashboardClient({ initialMovies, initialRecommendations 
                       }}>
                         <Edit className="w-4 h-4 mr-2" /> Edit
                       </DropdownMenuItem>
-                      <DropdownMenuItem className="text-destructive focus:bg-destructive/10 focus:text-destructive" onClick={(e) => handleDelete(e, media.tmdb_id)}>
+                      <DropdownMenuItem className="text-destructive focus:bg-destructive/10 focus:text-destructive" onClick={(e) => confirmDelete(e, media)}>
                         <Trash2 className="w-4 h-4 mr-2" /> Delete
                       </DropdownMenuItem>
                     </DropdownMenuContent>
@@ -317,6 +325,25 @@ export default function DashboardClient({ initialMovies, initialRecommendations 
           router.refresh()
         }}
       />
+
+      <Dialog open={!!itemToDelete} onOpenChange={(open) => !open && setItemToDelete(null)}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Delete Title</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete "{itemToDelete?.title}" from your watched list? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="mt-4">
+            <Button variant="outline" onClick={() => setItemToDelete(null)}>
+              No, keep it
+            </Button>
+            <Button variant="destructive" onClick={executeDelete}>
+              Yes, delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
