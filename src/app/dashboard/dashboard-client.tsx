@@ -277,7 +277,6 @@ export default function DashboardClient({ initialMovies, initialRecommendations 
         onClose={() => {
           setIsModalOpen(false)
           router.refresh()
-          fetchRecommendations()
         }}
       />
     </div>
