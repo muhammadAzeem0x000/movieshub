@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Loader2, Star, Film } from 'lucide-react'
+import { Loader2, Star, Film, Edit2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { saveMedia } from '@/app/actions/media'
 
@@ -15,19 +15,22 @@ interface MediaModalProps {
   initialData?: { rating?: number, review?: string } | null
   isOpen: boolean
   onClose: () => void
+  initialMode?: 'view' | 'edit'
 }
 
-export function MovieModal({ mediaId, mediaType, initialData, isOpen, onClose }: MediaModalProps) {
+export function MovieModal({ mediaId, mediaType, initialData, isOpen, onClose, initialMode = 'edit' }: MediaModalProps) {
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [mediaDetails, setMediaDetails] = useState<any>(null)
   const [rating, setRating] = useState<number>(0)
   const [review, setReview] = useState('')
+  const [isEditMode, setIsEditMode] = useState(initialMode)
 
   useEffect(() => {
     if (isOpen && mediaId && mediaType) {
       setRating(initialData?.rating || 0)
       setReview(initialData?.review || '')
+      setIsEditMode(initialMode)
       setMediaDetails(null)
       fetchDetails(mediaId, mediaType)
     }
@@ -77,10 +80,20 @@ export function MovieModal({ mediaId, mediaType, initialData, isOpen, onClose }:
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Mark as Watched</DialogTitle>
-          <DialogDescription>
-            Rate and review this movie to add it to your personal list.
-          </DialogDescription>
+          <div className="flex justify-between items-start gap-4 pr-6">
+            <div className="flex flex-col gap-1.5 text-left">
+              <DialogTitle>{isEditMode ? (initialData ? 'Edit Title' : 'Mark as Watched') : 'Title Details'}</DialogTitle>
+              <DialogDescription>
+                {isEditMode ? 'Rate and review this movie to add it to your personal list.' : 'Your saved rating and review for this title.'}
+              </DialogDescription>
+            </div>
+            {!isEditMode && (
+              <Button variant="outline" size="sm" onClick={() => setIsEditMode('edit')} className="shrink-0 mt-1">
+                <Edit2 className="w-4 h-4 mr-2" />
+                Edit
+              </Button>
+            )}
+          </div>
         </DialogHeader>
 
         {loading ? (
@@ -124,22 +137,35 @@ export function MovieModal({ mediaId, mediaType, initialData, isOpen, onClose }:
 
             <div className="grid gap-2">
               <Label>Your Rating (1-10)</Label>
-              <div className="flex gap-1 items-center justify-between">
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((star) => (
-                  <button
-                    key={star}
-                    type="button"
-                    onClick={() => setRating(star)}
-                    className="focus:outline-none focus:scale-110 transition-transform"
-                  >
+              {isEditMode ? (
+                <div className="flex gap-1 items-center justify-between">
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() => setRating(star)}
+                      className="focus:outline-none focus:scale-110 transition-transform"
+                    >
+                      <Star
+                        className={`h-6 w-6 ${
+                          rating >= star ? 'fill-yellow-500 text-yellow-500' : 'text-muted-foreground'
+                        }`}
+                      />
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex gap-1 items-center">
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((star) => (
                     <Star
+                      key={star}
                       className={`h-6 w-6 ${
-                        rating >= star ? 'fill-yellow-500 text-yellow-500' : 'text-muted-foreground'
+                        rating >= star ? 'fill-yellow-500 text-yellow-500' : 'text-muted-foreground/30'
                       }`}
                     />
-                  </button>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
               <div className="text-center text-sm font-medium h-4 text-muted-foreground">
                 {rating > 0 ? `${rating} / 10` : 'Optional'}
               </div>
@@ -147,25 +173,40 @@ export function MovieModal({ mediaId, mediaType, initialData, isOpen, onClose }:
 
             <div className="grid gap-2">
               <Label htmlFor="review">Review / Notes</Label>
-              <Textarea
-                id="review"
-                placeholder="What did you think?"
-                value={review}
-                onChange={(e) => setReview(e.target.value)}
-                className="resize-none h-24"
-              />
+              {isEditMode ? (
+                <Textarea
+                  id="review"
+                  placeholder="What did you think?"
+                  value={review}
+                  onChange={(e) => setReview(e.target.value)}
+                  className="resize-none h-24"
+                />
+              ) : (
+                <div className="text-sm bg-muted/50 p-3 rounded-md min-h-[60px] whitespace-pre-wrap border">
+                  {review ? review : <span className="text-muted-foreground italic">No review provided.</span>}
+                </div>
+              )}
             </div>
           </div>
         ) : null}
 
         <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={saving}>
-            Cancel
-          </Button>
-          <Button onClick={handleSave} disabled={loading || saving || !mediaDetails}>
-            {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {initialData ? 'Update Title' : 'Save Title'}
-          </Button>
+          {isEditMode ? (
+            <div className="flex justify-end gap-2 w-full">
+              <Button variant="outline" onClick={() => {
+                if (initialMode === 'view') setIsEditMode('view')
+                else onClose()
+              }} disabled={saving}>
+                Cancel
+              </Button>
+              <Button onClick={handleSave} disabled={loading || saving || !mediaDetails}>
+                {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {initialData ? 'Update Title' : 'Save Title'}
+              </Button>
+            </div>
+          ) : (
+            <Button onClick={onClose} className="w-full sm:w-auto">Close</Button>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>

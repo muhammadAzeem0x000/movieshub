@@ -70,3 +70,27 @@ export async function saveMedia(data: {
   revalidatePath('/dashboard')
   return { success: true }
 }
+
+export async function deleteMedia(tmdb_id: number) {
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { error: 'Not authenticated' }
+  }
+
+  const { error } = await supabase
+    .from('user_media')
+    .delete()
+    .eq('user_id', user.id)
+    .eq('tmdb_id', tmdb_id)
+
+  if (error) {
+    console.error('Failed to delete movie:', error)
+    return { error: 'Failed to delete movie' }
+  }
+
+  revalidatePath('/dashboard')
+  return { success: true }
+}

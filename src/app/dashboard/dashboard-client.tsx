@@ -7,8 +7,10 @@ import { MovieModal } from '@/components/movie-modal'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { Star, Filter, ArrowUpDown, Loader2, Film, Sparkles } from 'lucide-react'
+import { Star, Filter, ArrowUpDown, Loader2, Film, Sparkles, MoreVertical, Trash2, Edit } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
+import { deleteMedia } from '@/app/actions/media'
+import { toast } from 'sonner'
 
 export default function DashboardClient({ initialMovies, initialRecommendations = [] }: { initialMovies: any[], initialRecommendations?: any[] }) {
   const router = useRouter()
@@ -22,6 +24,8 @@ export default function DashboardClient({ initialMovies, initialRecommendations 
   const [selectedMediaType, setSelectedMediaType] = useState<'movie' | 'tv' | null>(null)
   const [selectedMediaData, setSelectedMediaData] = useState<{ rating?: number, review?: string } | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [initialModalMode, setInitialModalMode] = useState<'view' | 'edit'>('edit')
+  const [deletingId, setDeletingId] = useState<number | null>(null)
   
   const [genreFilter, setGenreFilter] = useState<string>('All')
   const [typeFilter, setTypeFilter] = useState<'All' | 'movie' | 'tv'>('All')
@@ -76,7 +80,7 @@ export default function DashboardClient({ initialMovies, initialRecommendations 
     }
   }
 
-  const handleSelectMedia = (media: any) => {
+  const handleSelectMedia = (media: any, mode: 'view' | 'edit' = 'edit') => {
     // media.tmdb_id exists if it comes from the DB, media.id is the TMDB ID if it comes from the search API
     setSelectedMediaId(media.tmdb_id || media.id)
     setSelectedMediaType(media.media_type)
@@ -88,7 +92,18 @@ export default function DashboardClient({ initialMovies, initialRecommendations 
       setSelectedMediaData(null)
     }
     
+    setInitialModalMode(mode)
     setIsModalOpen(true)
+  }
+
+  const handleDelete = async (e: React.MouseEvent, tmdb_id: number) => {
+    e.stopPropagation()
+    if (!confirm('Are you sure you want to delete this title?')) return
+    setDeletingId(tmdb_id)
+    const result = await deleteMedia(tmdb_id)
+    if (result.error) toast.error(result.error)
+    else toast.success('Title deleted successfully')
+    setDeletingId(null)
   }
 
   const allGenres = useMemo(() => {
@@ -237,7 +252,7 @@ export default function DashboardClient({ initialMovies, initialRecommendations 
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
           {filteredAndSortedMovies.map(media => (
-            <Card key={media.id} onClick={() => handleSelectMedia(media)} className="overflow-hidden relative group cursor-pointer">
+            <Card key={media.id} onClick={() => handleSelectMedia(media, 'view')} className={`overflow-hidden relative group cursor-pointer ${deletingId === media.tmdb_id ? 'opacity-50 pointer-events-none' : ''}`}>
               <div className="aspect-[2/3] bg-muted relative">
                 {media.poster_path ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -248,8 +263,30 @@ export default function DashboardClient({ initialMovies, initialRecommendations 
                 <div className="absolute top-2 left-2 bg-primary/90 text-primary-foreground px-1.5 py-0.5 rounded-sm text-[10px] font-bold uppercase tracking-wider">
                   {media.media_type}
                 </div>
+
+                <div className="absolute top-2 right-2 flex gap-1 z-10" onClick={(e) => e.stopPropagation()}>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="secondary" size="icon" className="h-6 w-6 rounded-md bg-black/60 hover:bg-black/80 text-white border-0 backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity">
+                        {deletingId === media.tmdb_id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <MoreVertical className="h-3.5 w-3.5" />}
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={(e) => {
+                        e.stopPropagation()
+                        handleSelectMedia(media, 'edit')
+                      }}>
+                        <Edit className="w-4 h-4 mr-2" /> Edit
+                      </DropdownMenuItem>
+                      <DropdownMenuItem className="text-destructive focus:bg-destructive/10 focus:text-destructive" onClick={(e) => handleDelete(e, media.tmdb_id)}>
+                        <Trash2 className="w-4 h-4 mr-2" /> Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+
                 {media.user_rating && (
-                  <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-md px-2 py-1 rounded-md flex items-center gap-1 text-yellow-500 font-semibold text-sm">
+                  <div className="absolute bottom-2 right-2 bg-black/60 backdrop-blur-md px-2 py-1 rounded-md flex items-center gap-1 text-yellow-500 font-semibold text-sm">
                     <Star className="w-3 h-3 fill-current" />
                     {media.user_rating}
                   </div>
@@ -274,6 +311,7 @@ export default function DashboardClient({ initialMovies, initialRecommendations 
         mediaId={selectedMediaId}
         mediaType={selectedMediaType}
         initialData={selectedMediaData}
+        initialMode={initialModalMode}
         onClose={() => {
           setIsModalOpen(false)
           router.refresh()
