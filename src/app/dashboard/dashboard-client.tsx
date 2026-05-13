@@ -274,10 +274,8 @@ export default function DashboardClient({ initialMovies, initialRecommendations 
 
                 <div className="absolute top-2 right-2 flex gap-1 z-10" onClick={(e) => e.stopPropagation()}>
                   <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="secondary" size="icon" className="h-6 w-6 rounded-md bg-black/60 hover:bg-black/80 text-white border-0 backdrop-blur-md opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-                        {deletingId === media.tmdb_id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <MoreVertical className="h-3.5 w-3.5" />}
-                      </Button>
+                    <DropdownMenuTrigger className="inline-flex items-center justify-center h-6 w-6 rounded-md bg-black/60 hover:bg-black/80 text-white border-0 backdrop-blur-md opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                      {deletingId === media.tmdb_id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <MoreVertical className="h-3.5 w-3.5" />}
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem onClick={(e) => {
