@@ -24,13 +24,13 @@ export function MovieModal({ mediaId, mediaType, initialData, isOpen, onClose, i
   const [mediaDetails, setMediaDetails] = useState<any>(null)
   const [rating, setRating] = useState<number>(0)
   const [review, setReview] = useState('')
-  const [isEditMode, setIsEditMode] = useState(initialMode)
+  const [isEditMode, setIsEditMode] = useState(initialMode === 'edit')
 
   useEffect(() => {
     if (isOpen && mediaId && mediaType) {
       setRating(initialData?.rating || 0)
       setReview(initialData?.review || '')
-      setIsEditMode(initialMode)
+      setIsEditMode(initialMode === 'edit')
       setMediaDetails(null)
       fetchDetails(mediaId, mediaType)
     }
@@ -88,7 +88,7 @@ export function MovieModal({ mediaId, mediaType, initialData, isOpen, onClose, i
               </DialogDescription>
             </div>
             {!isEditMode && (
-              <Button variant="outline" size="sm" onClick={() => setIsEditMode('edit')} className="shrink-0 mt-1">
+              <Button variant="outline" size="sm" onClick={() => setIsEditMode(true)} className="shrink-0 mt-1">
                 <Edit2 className="w-4 h-4 mr-2" />
                 Edit
               </Button>
@@ -194,7 +194,7 @@ export function MovieModal({ mediaId, mediaType, initialData, isOpen, onClose, i
           {isEditMode ? (
             <div className="flex justify-end gap-2 w-full">
               <Button variant="outline" onClick={() => {
-                if (initialMode === 'view') setIsEditMode('view')
+                if (initialMode === 'view') setIsEditMode(false)
                 else onClose()
               }} disabled={saving}>
                 Cancel
