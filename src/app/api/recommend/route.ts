@@ -34,31 +34,33 @@ export async function GET(request: Request) {
   // Not enough active recommendations, auto-generate 10 more
   const { data: movies, error } = await supabase
     .from('user_media')
-    .select('title, genres, user_rating, review')
+    .select('title, user_rating, review')
     .eq('user_id', user.id)
-    .gte('user_rating', 6)
-    .order('user_rating', { ascending: false })
-    .limit(30)
+    .order('watched_at', { ascending: false })
+    .limit(500)
 
   if (error) {
     return NextResponse.json({ error: 'Failed to fetch movies' }, { status: 500 })
   }
 
   if (!movies || movies.length === 0) {
-    return NextResponse.json({ error: 'Not enough highly rated titles to generate recommendations.' }, { status: 400 })
+    return NextResponse.json({ error: 'Not enough titles to generate recommendations.' }, { status: 400 })
   }
 
   const movieList = movies.map(m => {
-    let line = `- ${m.title} (Rating: ${m.user_rating}/10, Genres: ${m.genres.join(', ')})`
+    let line = `- ${m.title}`
+    if (m.user_rating) line += ` (Rating: ${m.user_rating}/10)`
     if (m.review) line += ` | User's review: "${m.review}"`
     return line
   }).join('\n')
 
   const prompt = `
-The user has watched and rated the following titles:
+The user has watched the following titles:
 ${movieList}
 
-Based on these titles, their genres, their ratings, and especially the user's reviews, recommend exactly 10 movies or TV shows they haven't watched yet. 
+Based on these titles, their ratings, and especially the user's reviews, recommend exactly 10 movies or TV shows they would enjoy.
+CRITICAL RULE: DO NOT recommend any title that is already in the user's watched list above.
+
 Format the output strictly as a JSON object with a key "recommendations" containing an array of objects.
 Each object must have the following keys:
 - "title" (string): the movie or TV show title
