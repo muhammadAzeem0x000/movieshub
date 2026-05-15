@@ -34,7 +34,7 @@ export async function GET(request: Request) {
   // Not enough active recommendations, auto-generate 10 more
   const { data: movies, error } = await supabase
     .from('user_media')
-    .select('title, user_rating, review')
+    .select('title, user_rating, review, media_type')
     .eq('user_id', user.id)
     .order('watched_at', { ascending: false })
     .limit(500)
@@ -47,23 +47,48 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Not enough titles to generate recommendations.' }, { status: 400 })
   }
 
-  const movieList = movies.map(m => {
+  const movieItems = movies.filter(m => m.media_type === 'movie')
+  const tvItems = movies.filter(m => m.media_type === 'tv')
+
+  const formatList = (items: typeof movies) => items.map(m => {
     let line = `- ${m.title}`
     if (m.user_rating) line += ` (Rating: ${m.user_rating}/10)`
     if (m.review) line += ` | User's review: "${m.review}"`
     return line
   }).join('\n')
 
+  const movieList = formatList(movieItems)
+  const tvList = formatList(tvItems)
+
+  // Build debug payload for frontend visibility
+  const debugPayload = {
+    totalTitles: movies.length,
+    movieCount: movieItems.length,
+    tvCount: tvItems.length,
+    moviesSent: movieItems.map(m => ({ title: m.title, rating: m.user_rating || null, hasReview: !!m.review })),
+    tvShowsSent: tvItems.map(m => ({ title: m.title, rating: m.user_rating || null, hasReview: !!m.review })),
+  }
+
   const prompt = `
-The user has watched the following titles:
-${movieList}
+The user has watched the following MOVIES (${movieItems.length} total):
+${movieList || '(none)'}
 
-Based on these titles, their ratings, and especially the user's reviews, recommend exactly 10 movies or TV shows they would enjoy.
-CRITICAL RULE: DO NOT recommend any title that is already in the user's watched list above.
+The user has also watched the following TV SHOWS (${tvItems.length} total):
+${tvList || '(none)'}
 
-Format the output strictly as a JSON object with a key "recommendations" containing an array of objects.
+Based on ALL the titles above, their ratings, and especially the user's reviews, recommend EXACTLY 20 titles:
+- EXACTLY 10 MOVIES (media_type: "movie")
+- EXACTLY 10 TV SHOWS (media_type: "tv")
+
+CRITICAL RULES:
+1. DO NOT recommend any title that is already in the user's watched list above.
+2. You MUST return exactly 10 movies and exactly 10 TV shows - no more, no less.
+3. Order them with movies first, then TV shows.
+
+Format the output strictly as a JSON object with a key "recommendations" containing an array of 20 objects.
 Each object must have the following keys:
 - "title" (string): the movie or TV show title
+- "media_type" (string): either "movie" or "tv"
 - "reason" (string): a short explanation of why they would like it based on their history
 - "tmdb_id" (number): the TMDB ID of the title, or 0 if unknown
   `
@@ -131,7 +156,7 @@ Each object must have the following keys:
     // Combine existing active ones with the new ones
     const allActive = [...(activeRecs || []), ...enrichedRecs]
 
-    return NextResponse.json({ recommendations: allActive })
+    return NextResponse.json({ recommendations: allActive, debug: debugPayload })
   } catch (error: any) {
     console.error('OpenAI Error:', error)
     return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 })

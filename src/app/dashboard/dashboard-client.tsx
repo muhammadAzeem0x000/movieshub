@@ -7,7 +7,7 @@ import { MovieModal } from '@/components/movie-modal'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { Star, Filter, ArrowUpDown, Loader2, Film, Sparkles, MoreVertical, Trash2, Edit } from 'lucide-react'
+import { Star, Filter, ArrowUpDown, Loader2, Film, Sparkles, MoreVertical, Trash2, Edit, ChevronDown, ChevronUp, Bug } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { deleteMedia } from '@/app/actions/media'
@@ -36,6 +36,9 @@ export default function DashboardClient({ initialMovies, initialRecommendations 
   const [recommendations, setRecommendations] = useState<any[]>(initialRecommendations)
   const [loadingRecs, setLoadingRecs] = useState(false)
   const [visibleRecsCount, setVisibleRecsCount] = useState(5)
+  const [recTypeFilter, setRecTypeFilter] = useState<'All' | 'movie' | 'tv'>('All')
+  const [debugPayload, setDebugPayload] = useState<any>(null)
+  const [showDebug, setShowDebug] = useState(false)
 
   useEffect(() => {
     setRecommendations(initialRecommendations)
@@ -52,7 +55,11 @@ export default function DashboardClient({ initialMovies, initialRecommendations 
       const data = await res.json()
       if (data.recommendations) {
         setRecommendations(data.recommendations)
-      } else if (data.error) {
+      }
+      if (data.debug) {
+        setDebugPayload(data.debug)
+      }
+      if (data.error) {
         if (data.error !== "Not enough highly rated titles to generate recommendations.") {
           console.error('Error fetching recs:', data.error)
         }
@@ -157,11 +164,101 @@ export default function DashboardClient({ initialMovies, initialRecommendations 
             <span className="truncate">{loadingRecs ? "Regenerating..." : "Regenerate Recommendations"}</span>
           </Button>
         </div>
-        
+
+        {/* Category Filter Tabs */}
         {recommendations.length > 0 && (
-          <>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-              {recommendations.slice(0, visibleRecsCount).map((rec, i) => (
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-sm font-medium text-muted-foreground mr-1">Filter:</span>
+            {(['All', 'movie', 'tv'] as const).map(filterVal => {
+              const count = filterVal === 'All'
+                ? recommendations.length
+                : recommendations.filter(r => r.media_type === filterVal).length
+              const label = filterVal === 'All' ? 'All' : filterVal === 'movie' ? 'Movies' : 'TV Shows'
+              return (
+                <Button
+                  key={filterVal}
+                  variant={recTypeFilter === filterVal ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => { setRecTypeFilter(filterVal); setVisibleRecsCount(5) }}
+                  className={`rounded-full text-xs px-4 h-7 font-semibold transition-all ${
+                    recTypeFilter === filterVal
+                      ? 'bg-gradient-to-r from-blue-600 to-cyan-500 text-white border-0 shadow-md'
+                      : 'hover:bg-blue-500/10'
+                  }`}
+                >
+                  {label} ({count})
+                </Button>
+              )
+            })}
+          </div>
+        )}
+
+        {/* Debug Panel */}
+        {debugPayload && (
+          <div className="border border-amber-500/30 bg-amber-500/5 rounded-lg overflow-hidden">
+            <button
+              onClick={() => setShowDebug(!showDebug)}
+              className="w-full flex items-center justify-between px-4 py-2.5 text-sm font-medium text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 transition-colors"
+            >
+              <span className="flex items-center gap-2">
+                <Bug className="h-4 w-4" />
+                API Debug: {debugPayload.totalTitles} titles sent ({debugPayload.movieCount} movies, {debugPayload.tvCount} TV shows)
+              </span>
+              {showDebug ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+            </button>
+            {showDebug && (
+              <div className="px-4 pb-4 space-y-3 border-t border-amber-500/20">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-3">
+                  <div>
+                    <h4 className="text-sm font-semibold text-amber-600 dark:text-amber-400 mb-2">🎬 Movies Sent ({debugPayload.movieCount})</h4>
+                    {debugPayload.moviesSent?.length > 0 ? (
+                      <div className="space-y-1 max-h-[300px] overflow-y-auto pr-2">
+                        {debugPayload.moviesSent.map((m: any, i: number) => (
+                          <div key={i} className="flex items-center justify-between text-xs bg-background/60 px-2.5 py-1.5 rounded border border-border/50">
+                            <span className="truncate mr-2 font-medium">{m.title}</span>
+                            <span className="shrink-0 flex items-center gap-1">
+                              {m.rating ? <><Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />{m.rating}/10</> : <span className="text-muted-foreground">No rating</span>}
+                              {m.hasReview && <span className="ml-1 text-blue-500" title="Has review">💬</span>}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-muted-foreground italic">No movies in watched list</p>
+                    )}
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-semibold text-amber-600 dark:text-amber-400 mb-2">📺 TV Shows Sent ({debugPayload.tvCount})</h4>
+                    {debugPayload.tvShowsSent?.length > 0 ? (
+                      <div className="space-y-1 max-h-[300px] overflow-y-auto pr-2">
+                        {debugPayload.tvShowsSent.map((m: any, i: number) => (
+                          <div key={i} className="flex items-center justify-between text-xs bg-background/60 px-2.5 py-1.5 rounded border border-border/50">
+                            <span className="truncate mr-2 font-medium">{m.title}</span>
+                            <span className="shrink-0 flex items-center gap-1">
+                              {m.rating ? <><Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />{m.rating}/10</> : <span className="text-muted-foreground">No rating</span>}
+                              {m.hasReview && <span className="ml-1 text-blue-500" title="Has review">💬</span>}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-muted-foreground italic">No TV shows in watched list</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+        
+        {recommendations.length > 0 && (() => {
+          const filteredRecs = recTypeFilter === 'All'
+            ? recommendations
+            : recommendations.filter(r => r.media_type === recTypeFilter)
+          return (
+            <>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+              {filteredRecs.slice(0, visibleRecsCount).map((rec, i) => (
                 <Card key={rec.id || i} className="flex flex-col overflow-hidden group">
                   <div className="aspect-[2/3] w-full bg-muted relative overflow-hidden">
                     {rec.poster_path ? (
@@ -188,9 +285,9 @@ export default function DashboardClient({ initialMovies, initialRecommendations 
                 </Card>
               ))}
             </div>
-            {(recommendations.length > visibleRecsCount || visibleRecsCount > 5) && (
+            {(filteredRecs.length > visibleRecsCount || visibleRecsCount > 5) && (
               <div className="flex justify-center mt-4 gap-2">
-                {recommendations.length > visibleRecsCount && (
+                {filteredRecs.length > visibleRecsCount && (
                   <Button variant="outline" onClick={() => setVisibleRecsCount(prev => prev + 5)}>
                     Show More
                   </Button>
@@ -203,7 +300,8 @@ export default function DashboardClient({ initialMovies, initialRecommendations 
               </div>
             )}
           </>
-        )}
+          )
+        })()}
         {recommendations.length === 0 && !loadingRecs && (
           <div className="p-8 text-center text-muted-foreground border rounded-lg border-dashed">
             Click &quot;Regenerate Recommendations&quot; to get AI recommendations based on your highly rated titles.
