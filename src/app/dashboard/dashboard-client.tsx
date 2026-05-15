@@ -39,6 +39,7 @@ export default function DashboardClient({ initialMovies, initialRecommendations 
   const [recTypeFilter, setRecTypeFilter] = useState<'All' | 'movie' | 'tv'>('All')
   const [debugPayload, setDebugPayload] = useState<any>(null)
   const [showDebug, setShowDebug] = useState(false)
+  const [debugTab, setDebugTab] = useState<'data' | 'prompt' | 'blocklist'>('data')
 
   useEffect(() => {
     setRecommendations(initialRecommendations)
@@ -208,44 +209,101 @@ export default function DashboardClient({ initialMovies, initialRecommendations 
             </button>
             {showDebug && (
               <div className="px-4 pb-4 space-y-3 border-t border-amber-500/20">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-3">
-                  <div>
-                    <h4 className="text-sm font-semibold text-amber-600 dark:text-amber-400 mb-2">🎬 Movies Sent ({debugPayload.movieCount})</h4>
-                    {debugPayload.moviesSent?.length > 0 ? (
-                      <div className="space-y-1 max-h-[300px] overflow-y-auto pr-2">
-                        {debugPayload.moviesSent.map((m: any, i: number) => (
-                          <div key={i} className="flex items-center justify-between text-xs bg-background/60 px-2.5 py-1.5 rounded border border-border/50">
-                            <span className="truncate mr-2 font-medium">{m.title}</span>
-                            <span className="shrink-0 flex items-center gap-1">
-                              {m.rating ? <><Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />{m.rating}/10</> : <span className="text-muted-foreground">No rating</span>}
-                              {m.hasReview && <span className="ml-1 text-blue-500" title="Has review">💬</span>}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="text-xs text-muted-foreground italic">No movies in watched list</p>
-                    )}
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-semibold text-amber-600 dark:text-amber-400 mb-2">📺 TV Shows Sent ({debugPayload.tvCount})</h4>
-                    {debugPayload.tvShowsSent?.length > 0 ? (
-                      <div className="space-y-1 max-h-[300px] overflow-y-auto pr-2">
-                        {debugPayload.tvShowsSent.map((m: any, i: number) => (
-                          <div key={i} className="flex items-center justify-between text-xs bg-background/60 px-2.5 py-1.5 rounded border border-border/50">
-                            <span className="truncate mr-2 font-medium">{m.title}</span>
-                            <span className="shrink-0 flex items-center gap-1">
-                              {m.rating ? <><Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />{m.rating}/10</> : <span className="text-muted-foreground">No rating</span>}
-                              {m.hasReview && <span className="ml-1 text-blue-500" title="Has review">💬</span>}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="text-xs text-muted-foreground italic">No TV shows in watched list</p>
-                    )}
-                  </div>
+                {/* Debug Tab Buttons */}
+                <div className="flex gap-1 pt-3">
+                  {([
+                    { key: 'data' as const, label: '📊 Data Sent' },
+                    { key: 'prompt' as const, label: '📝 Prompt' },
+                    { key: 'blocklist' as const, label: '🚫 Blocklist' },
+                  ]).map(tab => (
+                    <button
+                      key={tab.key}
+                      onClick={() => setDebugTab(tab.key)}
+                      className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all ${
+                        debugTab === tab.key
+                          ? 'bg-amber-500/20 text-amber-700 dark:text-amber-300 shadow-sm'
+                          : 'text-muted-foreground hover:bg-amber-500/10'
+                      }`}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
                 </div>
+
+                {/* Data Sent Tab */}
+                {debugTab === 'data' && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <h4 className="text-sm font-semibold text-amber-600 dark:text-amber-400 mb-2">🎬 Movies Sent ({debugPayload.movieCount})</h4>
+                      {debugPayload.moviesSent?.length > 0 ? (
+                        <div className="space-y-1 max-h-[300px] overflow-y-auto pr-2">
+                          {debugPayload.moviesSent.map((m: any, i: number) => (
+                            <div key={i} className="flex items-center justify-between text-xs bg-background/60 px-2.5 py-1.5 rounded border border-border/50">
+                              <span className="truncate mr-2 font-medium">{m.title} <span className="text-muted-foreground">#{m.tmdb_id}</span></span>
+                              <span className="shrink-0 flex items-center gap-1">
+                                {m.rating ? <><Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />{m.rating}/10</> : <span className="text-muted-foreground">No rating</span>}
+                                {m.hasReview && <span className="ml-1 text-blue-500" title="Has review">💬</span>}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-xs text-muted-foreground italic">No movies in watched list</p>
+                      )}
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-semibold text-amber-600 dark:text-amber-400 mb-2">📺 TV Shows Sent ({debugPayload.tvCount})</h4>
+                      {debugPayload.tvShowsSent?.length > 0 ? (
+                        <div className="space-y-1 max-h-[300px] overflow-y-auto pr-2">
+                          {debugPayload.tvShowsSent.map((m: any, i: number) => (
+                            <div key={i} className="flex items-center justify-between text-xs bg-background/60 px-2.5 py-1.5 rounded border border-border/50">
+                              <span className="truncate mr-2 font-medium">{m.title} <span className="text-muted-foreground">#{m.tmdb_id}</span></span>
+                              <span className="shrink-0 flex items-center gap-1">
+                                {m.rating ? <><Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />{m.rating}/10</> : <span className="text-muted-foreground">No rating</span>}
+                                {m.hasReview && <span className="ml-1 text-blue-500" title="Has review">💬</span>}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-xs text-muted-foreground italic">No TV shows in watched list</p>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Prompt Tab */}
+                {debugTab === 'prompt' && (
+                  <div className="space-y-3">
+                    <div>
+                      <h4 className="text-sm font-semibold text-amber-600 dark:text-amber-400 mb-2">System Prompt</h4>
+                      <pre className="text-xs bg-background/60 p-3 rounded border border-border/50 whitespace-pre-wrap max-h-[200px] overflow-y-auto font-mono leading-relaxed">{debugPayload.systemPromptSent || 'N/A'}</pre>
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-semibold text-amber-600 dark:text-amber-400 mb-2">User Prompt</h4>
+                      <pre className="text-xs bg-background/60 p-3 rounded border border-border/50 whitespace-pre-wrap max-h-[400px] overflow-y-auto font-mono leading-relaxed">{debugPayload.promptSent || 'N/A'}</pre>
+                    </div>
+                  </div>
+                )}
+
+                {/* Blocklist Tab */}
+                {debugTab === 'blocklist' && (
+                  <div>
+                    <h4 className="text-sm font-semibold text-amber-600 dark:text-amber-400 mb-2">🚫 Blocked Titles ({debugPayload.blocklist?.length || 0})</h4>
+                    <p className="text-xs text-muted-foreground mb-2">These titles are programmatically removed from recommendations after OpenAI responds, even if the AI ignores the exclusion instruction.</p>
+                    {debugPayload.blocklist?.length > 0 ? (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-1 max-h-[300px] overflow-y-auto pr-2">
+                        {debugPayload.blocklist.map((title: string, i: number) => (
+                          <div key={i} className="text-xs bg-red-500/10 text-red-700 dark:text-red-400 px-2.5 py-1.5 rounded border border-red-500/20 font-medium truncate" title={title}>
+                            {title}
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-muted-foreground italic">No blocklist available</p>
+                    )}
+                  </div>
+                )}
               </div>
             )}
           </div>
